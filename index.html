@@ -198,6 +198,7 @@
   .hp-label .hp-num { font-weight: 700; color: white; font-size: 12px; }
   .hp-track { width: 100%; height: 9px; background: rgba(255,255,255,0.07); border-radius: 5px; overflow: hidden; border: 1px solid rgba(255,255,255,0.04); }
   .hp-fill { height: 100%; border-radius: 5px; transition: width 0.4s ease, background-color 0.4s; position: relative; overflow: hidden; }
+  /* 반짝이 효과 */
   .hp-fill::after {
     content: '';
     position: absolute;
@@ -331,7 +332,7 @@
   }
   .target-label { color: var(--muted); font-size: 12px; text-align: center; line-height: 1.6; }
 
-  /* 정밀도 범위 표시 (극악 난이도로 수정됨) */
+  /* 정밀도 범위 표시 (극악 모드 반영) */
   .precision-hints {
     display: flex;
     gap: 16px;
@@ -561,7 +562,6 @@
   @keyframes cast-voldy  { 0% { transform: translateX(0); } 30% { transform: translateX(-18px) scale(1.15); } 100% { transform: translateX(0) scale(1); } }
   @keyframes hit-flash   { 0%,100% { filter: brightness(1); } 50% { filter: brightness(2.5) saturate(0.2); } }
   @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
-  @keyframes levelGlow { 0%,100% { box-shadow: 0 0 10px rgba(240,192,96,0.3); } 50% { box-shadow: 0 0 30px rgba(240,192,96,0.7); } }
 
   .hit-anim     { animation: shake 0.5s ease; }
   .attack-anim  { animation: cast-attack 0.5s ease; }
@@ -662,7 +662,7 @@
       </div>
       <div class="status-badges" id="voldyBadges"></div>
       <div class="hp-section">
-        <!-- 💡 볼드모트 시작 HP 300으로 변경됨 -->
+        <!-- 💡 볼드모트 HP 300 상향 -->
         <div class="hp-label"><span>HP</span><span class="hp-num" id="voldyHpNum">300 / 300</span></div>
         <div class="hp-track"><div class="hp-fill" id="voldyHpBar" style="width:100%;background:#2ecc71;"></div></div>
         <div class="mp-track" style="background:rgba(180,74,255,0.12);">
@@ -799,6 +799,7 @@ const HARRY_MAX_MP = 100, VOLDY_MAX_MP = 100;
 
 // 레벨 시스템
 const LEVEL_EXP = [0, 0, 30, 70, 120, 180];
+// 💡 밸런스 패치: 볼드모트의 레벨업 스노우볼링 억제
 const LEVEL_BONUS = {
   2: { hp: 20, mp: 20, desc: 'HP+20, MP+20 보너스!' },
   3: { hp: 15, mp: 15, desc: 'HP+15, MP+15, 공격력 10% 증가!' },
@@ -953,10 +954,7 @@ function startTiming(spell) {
 
   timerInterval = setInterval(() => {
     const elapsed = (Date.now() - startTime) / 1000;
-    const pct = Math.min(elapsed / BAR_DURATION, 1);
-    const bw = document.getElementById('timingBarWrap').offsetWidth;
-    document.getElementById('timingCursor').style.left = (pct * bw - 1.5) + 'px';
-
+    
     // 💡 [블라인드 모드 추가] 필살기 아바다 케다브라 & 목표시간 60% 경과 시 화면 가림!
     const isBlindActive = (pendingSpell === '아바다' && elapsed > targetTime * 0.6);
 
@@ -980,6 +978,10 @@ function startTiming(spell) {
         document.getElementById('stopwatchDisplay').style.color = 'white';
       }
     }
+
+    const pct = Math.min(elapsed / BAR_DURATION, 1);
+    const bw = document.getElementById('timingBarWrap').offsetWidth;
+    document.getElementById('timingCursor').style.left = (pct * bw - 1.5) + 'px';
 
     if (elapsed >= BAR_DURATION + 0.5) stopTiming();
   }, 16);
@@ -1034,6 +1036,7 @@ function executeSpell(spell, hitType, comboMult = 1.0) {
 
   state.harryMP = Math.max(0, state.harryMP - cost);
 
+  // 독/화상 처리
   if (state.voldyPoison > 0) {
     const pd = state.harryShield ? 0 : 5;
     if (!state.harryShield) { state.harryHP -= pd; addLog(`☠️ 크루시오 독 -${pd}HP (${state.voldyPoison-1}턴 남음)`, '#b44aff'); SFX.poison(); animHit('harry'); }
@@ -1047,6 +1050,8 @@ function executeSpell(spell, hitType, comboMult = 1.0) {
     SFX.burn(); animHit('voldy');
     state.voldyBurn--;
   }
+
+  // 재생 효과
   if (state.harryRegen > 0) {
     const rg = 8;
     state.harryHP = Math.min(state.harryMaxHP, state.harryHP + rg);
@@ -1057,6 +1062,7 @@ function executeSpell(spell, hitType, comboMult = 1.0) {
   state.harryShield = false;
   animAttack('harry');
 
+  // 주문별 처리
   if (spell === '익스펙토') {
     const dmg = Math.round(25 * mult * atkMult);
     addLog(`⚡ 해리: Expelliarmus! ${prefix}→ 볼드모트 -${dmg}HP`, logClr);
@@ -1101,11 +1107,13 @@ function executeSpell(spell, hitType, comboMult = 1.0) {
     state.incendioCooldown = 3; state.turn = 2;
   }
 
+  // 쿨다운 감소
   if (state.avadaCooldown > 0 && spell !== '아바다') state.avadaCooldown--;
   if (state.lumosCooldown > 0 && spell !== '루모스') state.lumosCooldown--;
   if (state.incendioCooldown > 0 && spell !== '인센디오') state.incendioCooldown--;
 
-  state.harryMP = Math.min(state.harryMaxMP, state.harryMP + 5);
+  // 💡 밸런스 패치: 해리 MP 매 턴 20 회복으로 상향
+  state.harryMP = Math.min(state.harryMaxMP, state.harryMP + 20);
 
   state.turnCount++;
   state.turnsPassed++;
@@ -1201,6 +1209,7 @@ function voldemortTurn() {
   endVoldyTurn();
 }
 
+// 💡 밸런스 패치: 볼드모트 레벨업 HP 증가량 하향
 function gainVoldyExp(amt) {
   if (state.voldyLevel >= 5) return;
   state.voldyExp += amt;
@@ -1208,7 +1217,7 @@ function gainVoldyExp(amt) {
   if (state.voldyExp >= needed) {
     state.voldyExp -= needed;
     state.voldyLevel++;
-    const bonus = {2:{hp:25,mp:15},3:{hp:20,mp:20},4:{hp:30,mp:20},5:{hp:25,mp:25}}[state.voldyLevel];
+    const bonus = {2:{hp:10,mp:15},3:{hp:10,mp:20},4:{hp:15,mp:20},5:{hp:10,mp:25}}[state.voldyLevel];
     if (bonus) {
       state.voldyMaxHP += bonus.hp;
       state.voldyHP = Math.min(state.voldyMaxHP, state.voldyHP + bonus.hp);
@@ -1220,8 +1229,9 @@ function gainVoldyExp(amt) {
   }
 }
 
+// 💡 밸런스 패치: 볼드모트 공격 데미지 전반적 하향
 function voldyAvada() {
-  const baseDmg = 32 + state.voldyLevel * 3;
+  const baseDmg = 20 + state.voldyLevel * 2;
   const dmg = state.harryShield ? Math.round(baseDmg * 0.25) : baseDmg;
   const shield = state.harryShield ? ' (방어막 경감!)' : '';
   addLog(`🐍 볼드모트: Avada Kedavra! → 해리 -${dmg}HP${shield}`, '#e74c3c');
@@ -1230,19 +1240,19 @@ function voldyAvada() {
 }
 function voldyCrucio() {
   if (state.voldyPoison > 0) {
-    const dmg = state.harryShield ? 4 : 20 + state.voldyLevel * 2;
+    const dmg = state.harryShield ? 2 : 12 + state.voldyLevel;
     addLog(`🐍 볼드모트: Sectumsempra! → 해리 -${dmg}HP`, '#e74c3c');
     state.harryHP -= dmg; state.harryShield = false;
     animHit('harry'); showDmgPopup('harry', dmg, 'normal'); SFX.hit();
   } else {
-    const dmg = state.harryShield ? 2 : 8 + state.voldyLevel;
+    const dmg = state.harryShield ? 1 : 5 + state.voldyLevel;
     addLog(`🐍 볼드모트: Crucio! → 해리 -${dmg}HP, 3턴간 독(-5HP/턴)`, '#e74c3c');
     state.harryHP -= dmg; state.voldyPoison = 3; state.harryShield = false;
     animHit('harry'); showDmgPopup('harry', dmg, 'normal'); SFX.poison();
   }
 }
 function voldyImperio() {
-  const dmg = state.harryShield ? 2 : 4 + state.voldyLevel;
+  const dmg = state.harryShield ? 0 : 3 + state.voldyLevel;
   addLog(`🐍 볼드모트: Imperio! → 해리 -${dmg}HP, 다음 턴 행동 불능!`, '#e74c3c');
   state.harryHP -= dmg; state.harryStunned = true; state.harryShield = false;
   animHit('harry'); showDmgPopup('harry', dmg, 'normal'); SFX.stupefy();
@@ -1257,7 +1267,8 @@ function endVoldyTurn() {
     if (state.harryStunned) {
       addLog('⚡ 해리가 Imperio에 걸려 이번 턴 행동 불능!', '#f1c40f');
       state.harryStunned = false; state.turnCount++;
-      state.harryMP = Math.min(state.harryMaxMP, state.harryMP + 5);
+      // 💡 밸런스 패치: 행동불능 상태일 때도 MP 회복량 20으로 상향
+      state.harryMP = Math.min(state.harryMaxMP, state.harryMP + 20);
       updateUI();
       setTimeout(() => {
         document.getElementById('voldyThinking').classList.add('visible');
