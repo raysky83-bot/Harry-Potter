@@ -198,7 +198,6 @@
   .hp-label .hp-num { font-weight: 700; color: white; font-size: 12px; }
   .hp-track { width: 100%; height: 9px; background: rgba(255,255,255,0.07); border-radius: 5px; overflow: hidden; border: 1px solid rgba(255,255,255,0.04); }
   .hp-fill { height: 100%; border-radius: 5px; transition: width 0.4s ease, background-color 0.4s; position: relative; overflow: hidden; }
-  /* 반짝이 효과 */
   .hp-fill::after {
     content: '';
     position: absolute;
@@ -332,7 +331,7 @@
   }
   .target-label { color: var(--muted); font-size: 12px; text-align: center; line-height: 1.6; }
 
-  /* 정밀도 범위 표시 */
+  /* 정밀도 범위 표시 (극악 난이도로 수정됨) */
   .precision-hints {
     display: flex;
     gap: 16px;
@@ -663,7 +662,8 @@
       </div>
       <div class="status-badges" id="voldyBadges"></div>
       <div class="hp-section">
-        <div class="hp-label"><span>HP</span><span class="hp-num" id="voldyHpNum">150 / 150</span></div>
+        <!-- 💡 볼드모트 시작 HP 300으로 변경됨 -->
+        <div class="hp-label"><span>HP</span><span class="hp-num" id="voldyHpNum">300 / 300</span></div>
         <div class="hp-track"><div class="hp-fill" id="voldyHpBar" style="width:100%;background:#2ecc71;"></div></div>
         <div class="mp-track" style="background:rgba(180,74,255,0.12);">
           <div class="mp-fill" id="voldyMpBar" style="width:100%;background:linear-gradient(90deg,#8e44ad,#b44aff);"></div>
@@ -689,7 +689,7 @@
     </button>
     <button class="spell-btn s-stupefy" onclick="startTiming('스투페파이')">
       <span class="spell-mp-cost">25MP</span>
-      <img src="icon_swirl.png" class="spell-icon-img" alt="소용돌이">
+      <img src="icon_swirl.jpg" class="spell-icon-img" alt="소용돌이">
       <span class="spell-name">Stupefy</span>
       <span class="spell-desc">피해 18<br>적 턴 스킵</span>
     </button>
@@ -733,13 +733,14 @@
     </div>
     <div class="target-label">
       정확히 멈추세요!<br>
-      <span style="color:var(--warn);">±0.20s → 크리티컬</span>
+      <!-- 💡 판정 범위가 극악으로 좁아졌습니다 -->
+      <span style="color:var(--warn);">±0.08s → 크리티컬</span>
     </div>
   </div>
 
   <div class="precision-hints">
-    <div class="ph ph-crit">🔥 크리티컬 ±0.20s</div>
-    <div class="ph ph-norm">✅ 일반 ±0.50s</div>
+    <div class="ph ph-crit">🔥 크리티컬 ±0.08s</div>
+    <div class="ph ph-norm">✅ 일반 ±0.20s</div>
     <div class="ph ph-miss">💨 미스 그 외</div>
   </div>
 
@@ -792,11 +793,12 @@
 })();
 
 // ─── 게임 상태 ───────────────────────────────────────────────────────────────
-const HARRY_MAX_HP = 100, VOLDY_MAX_HP = 150;
+// 💡 볼드모트 MAX HP 300으로 변경
+const HARRY_MAX_HP = 100, VOLDY_MAX_HP = 300;
 const HARRY_MAX_MP = 100, VOLDY_MAX_MP = 100;
 
 // 레벨 시스템
-const LEVEL_EXP = [0, 0, 30, 70, 120, 180]; // [레벨1부터 필요 exp]
+const LEVEL_EXP = [0, 0, 30, 70, 120, 180];
 const LEVEL_BONUS = {
   2: { hp: 20, mp: 20, desc: 'HP+20, MP+20 보너스!' },
   3: { hp: 15, mp: 15, desc: 'HP+15, MP+15, 공격력 10% 증가!' },
@@ -815,35 +817,33 @@ let state = {
   avadaCooldown: 0,
   lumosCooldown: 0,
   incendioCooldown: 0,
-  voldyPoison: 0,     // 크루시오 독
-  harryBurn: 0,       // 인센디오 화상 (볼드모트에게)
-  voldyBurn: 0,       // 볼드모트에게 건 화상
+  voldyPoison: 0,
+  harryBurn: 0,
+  voldyBurn: 0,
   harryShield: false,
   harryStunned: false,
   voldyStunned: false,
-  harryRegen: 0,      // 재생 턴 수
-  // 레벨 시스템
+  harryRegen: 0,
   harryLevel: 1,
   harryExp: 0,
   voldyLevel: 1,
   voldyExp: 0,
-  // 콤보 시스템
   critCombo: 0,
   consecutiveCrit: 0,
   totalCrits: 0,
   totalHits: 0,
   totalMisses: 0,
   turnsPassed: 0,
-  // 공격력 배율
   harryAtkMult: 1.0,
-  critRangeBonus: 0, // 크리티컬 범위 확장 (초)
+  critRangeBonus: 0,
 };
 
-// ─── 타이밍 설정 ─────────────────────────────────────────────────────────────
-const CRIT_RANGE = 0.20;   // ±0.20초 = 크리티컬
-const NORM_RANGE = 0.50;   // ±0.50초 = 일반
+// ─── 타이밍 설정 (극악 난이도) ───────────────────────────────────────────────
+// 💡 타이밍 범위 대폭 축소 (0.08 / 0.20)
+const CRIT_RANGE = 0.08;
+const NORM_RANGE = 0.20;
 const TARGET_CHOICES = [1.00, 1.50, 2.00, 2.50, 3.00, 3.50, 4.00, 4.50, 5.00];
-const BAR_DURATION = 8.0;  // 바 전체 시간
+const BAR_DURATION = 8.0;
 
 let targetTime = 3.00;
 let startTime = 0, timerInterval = null, pendingSpell = "";
@@ -890,24 +890,19 @@ const SFX = {
   timing_norm: () => playTone(1000,'sine',0.04,0.12),
 };
 
-// ─── BGM ─────────────────────────────────────────────────────────────────────
+// BGM
+const bgmAudio = new Audio('bgm.mp3');
+bgmAudio.loop = true;
+bgmAudio.volume = 0.5;
 let bgPlaying = false;
 
 function playBGM() {
   if (bgPlaying) return;
-  const bgm = document.getElementById('bgmAudio');
-  if(bgm) {
-      bgm.volume = 0.5;
-      bgm.play().then(() => { bgPlaying = true; }).catch(() => {});
-  }
+  bgmAudio.play().then(() => { bgPlaying = true; }).catch(() => {});
 }
-
 function stopBGM() {
-  const bgm = document.getElementById('bgmAudio');
-  if(bgm) {
-      bgm.pause();
-      bgm.currentTime = 0;
-  }
+  bgmAudio.pause();
+  bgmAudio.currentTime = 0;
   bgPlaying = false;
 }
 
@@ -924,13 +919,10 @@ function startTiming(spell) {
     return;
   }
 
-  playBGM(); // 💡 BGM 재생 추가!
+  playBGM();
 
   pendingSpell = spell;
-
-  // 랜덤 목표 시간 선택
   targetTime = TARGET_CHOICES[Math.floor(Math.random() * TARGET_CHOICES.length)];
-  // 레벨 4+ 크리티컬 범위 확장
   const critR = CRIT_RANGE + state.critRangeBonus;
   const normR = NORM_RANGE;
 
@@ -941,7 +933,6 @@ function startTiming(spell) {
   document.getElementById('timingSpellName').textContent = '✨ ' + spellNames[spell];
   document.getElementById('targetTimeDisplay').textContent = targetTime.toFixed(2);
 
-  // 바 존 계산
   const barW = document.getElementById('timingBarWrap').offsetWidth;
   const ratio = targetTime / BAR_DURATION;
   const markerPx = ratio * barW;
@@ -955,30 +946,39 @@ function startTiming(spell) {
   document.getElementById('timingOverlay').style.display = 'flex';
   document.getElementById('stopwatchDisplay').style.color = 'white';
   document.getElementById('timingCursor').style.left = '0px';
+  document.getElementById('timingCursor').style.opacity = '1';
 
   SFX.cast();
   startTime = Date.now();
 
   timerInterval = setInterval(() => {
     const elapsed = (Date.now() - startTime) / 1000;
-    document.getElementById('stopwatchDisplay').textContent = elapsed.toFixed(2);
-
-    // 커서 이동
     const pct = Math.min(elapsed / BAR_DURATION, 1);
     const bw = document.getElementById('timingBarWrap').offsetWidth;
     document.getElementById('timingCursor').style.left = (pct * bw - 1.5) + 'px';
 
-    // 색상 피드백
-    const diff = Math.abs(targetTime - elapsed);
-    const critR2 = CRIT_RANGE + state.critRangeBonus;
-    if (diff <= critR2) {
-      document.getElementById('stopwatchDisplay').style.color = '#f1c40f';
-      SFX.timing_crit();
-    } else if (diff <= NORM_RANGE) {
-      document.getElementById('stopwatchDisplay').style.color = '#2ecc71';
-      SFX.timing_norm();
+    // 💡 [블라인드 모드 추가] 필살기 아바다 케다브라 & 목표시간 60% 경과 시 화면 가림!
+    const isBlindActive = (pendingSpell === '아바다' && elapsed > targetTime * 0.6);
+
+    if (isBlindActive) {
+      document.getElementById('stopwatchDisplay').textContent = "? . ??";
+      document.getElementById('stopwatchDisplay').style.color = '#8e44ad'; // 으스스한 보라색
+      document.getElementById('timingCursor').style.opacity = '0'; // 움직이는 바 숨기기
     } else {
-      document.getElementById('stopwatchDisplay').style.color = 'white';
+      document.getElementById('stopwatchDisplay').textContent = elapsed.toFixed(2);
+      document.getElementById('timingCursor').style.opacity = '1';
+
+      const diff = Math.abs(targetTime - elapsed);
+      const critR2 = CRIT_RANGE + state.critRangeBonus;
+      if (diff <= critR2) {
+        document.getElementById('stopwatchDisplay').style.color = '#f1c40f';
+        SFX.timing_crit();
+      } else if (diff <= NORM_RANGE) {
+        document.getElementById('stopwatchDisplay').style.color = '#2ecc71';
+        SFX.timing_norm();
+      } else {
+        document.getElementById('stopwatchDisplay').style.color = 'white';
+      }
     }
 
     if (elapsed >= BAR_DURATION + 0.5) stopTiming();
@@ -988,17 +988,17 @@ function startTiming(spell) {
 function stopTiming() {
   clearInterval(timerInterval);
   document.getElementById('timingOverlay').style.display = 'none';
+  document.getElementById('timingCursor').style.opacity = '1'; // 바 투명도 원상복구
 
   const stopped = (Date.now() - startTime) / 1000;
   const diff = Math.abs(targetTime - stopped);
   const critR = CRIT_RANGE + state.critRangeBonus;
 
   let hitType;
-  if (diff <= critR)      { hitType = 'critical'; SFX.critical(); flashScreen('crit'); state.consecutiveCrit++; state.totalCrits++; }
+  if (diff <= critR)           { hitType = 'critical'; SFX.critical(); flashScreen('crit'); state.consecutiveCrit++; state.totalCrits++; }
   else if (diff <= NORM_RANGE) { hitType = 'normal'; SFX.beep(); flashScreen('hit'); state.consecutiveCrit = 0; state.totalHits++; }
   else                         { hitType = 'miss'; SFX.miss(); flashScreen('miss'); state.consecutiveCrit = 0; state.totalMisses++; }
 
-  // 콤보 시스템
   if (hitType === 'critical') {
     state.critCombo++;
     if (state.critCombo >= 2) {
@@ -1011,9 +1011,7 @@ function stopTiming() {
     document.getElementById('comboDisplay').classList.remove('show');
   }
 
-  // 콤보 배율 (크리티컬 연속 시 추가 데미지)
   const comboMult = hitType === 'critical' && state.critCombo >= 2 ? (1 + (state.critCombo - 1) * 0.1) : 1.0;
-
   addLog(`⏱ 멈춘 시간: ${stopped.toFixed(2)}s | 목표: ${targetTime.toFixed(2)}s | 오차: ${diff.toFixed(2)}s`, '#8899aa');
   executeSpell(pendingSpell, hitType, comboMult);
 }
@@ -1036,7 +1034,6 @@ function executeSpell(spell, hitType, comboMult = 1.0) {
 
   state.harryMP = Math.max(0, state.harryMP - cost);
 
-  // 독/화상 처리
   if (state.voldyPoison > 0) {
     const pd = state.harryShield ? 0 : 5;
     if (!state.harryShield) { state.harryHP -= pd; addLog(`☠️ 크루시오 독 -${pd}HP (${state.voldyPoison-1}턴 남음)`, '#b44aff'); SFX.poison(); animHit('harry'); }
@@ -1050,8 +1047,6 @@ function executeSpell(spell, hitType, comboMult = 1.0) {
     SFX.burn(); animHit('voldy');
     state.voldyBurn--;
   }
-
-  // 재생 효과
   if (state.harryRegen > 0) {
     const rg = 8;
     state.harryHP = Math.min(state.harryMaxHP, state.harryHP + rg);
@@ -1062,7 +1057,6 @@ function executeSpell(spell, hitType, comboMult = 1.0) {
   state.harryShield = false;
   animAttack('harry');
 
-  // 주문별 처리
   if (spell === '익스펙토') {
     const dmg = Math.round(25 * mult * atkMult);
     addLog(`⚡ 해리: Expelliarmus! ${prefix}→ 볼드모트 -${dmg}HP`, logClr);
@@ -1107,12 +1101,10 @@ function executeSpell(spell, hitType, comboMult = 1.0) {
     state.incendioCooldown = 3; state.turn = 2;
   }
 
-  // 쿨다운 감소
   if (state.avadaCooldown > 0 && spell !== '아바다') state.avadaCooldown--;
   if (state.lumosCooldown > 0 && spell !== '루모스') state.lumosCooldown--;
   if (state.incendioCooldown > 0 && spell !== '인센디오') state.incendioCooldown--;
 
-  // MP 자연 회복
   state.harryMP = Math.min(state.harryMaxMP, state.harryMP + 5);
 
   state.turnCount++;
@@ -1175,14 +1167,11 @@ function voldemortTurn() {
   if (state.voldyStunned) {
     addLog('🌀 볼드모트가 Stupefy에 의해 행동 불능!', '#f1c40f');
     state.voldyStunned = false;
-    // 볼드모트도 경험치 획득
     gainVoldyExp(15);
     endVoldyTurn(); return;
   }
 
   state.voldyMP = Math.min(state.voldyMaxMP, state.voldyMP + 8);
-
-  // 볼드모트도 레벨업
   gainVoldyExp(8);
 
   animAttack('voldy');
