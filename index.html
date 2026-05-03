@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>⚡ 마법사의 결투 ⚡</title>
+    <title>⚡ 해리포터 vs 볼드모트 ⚡</title>
     <style>
         body { font-family: 'Malgun Gothic', sans-serif; background-color: #1a1a2e; color: white; text-align: center; margin: 0; }
         h1 { color: #f39c12; margin-top: 20px;}
@@ -67,7 +67,7 @@
     <h1>⚡ 마법사의 결투 ⚡</h1>
 
     <div class="battlefield">
-        <!-- 해리 진영 (수정됨: .jpg) -->
+        <!-- 해리 진영 -->
         <div class="character-box">
             <div class="name">👓 해리 포터</div>
             <img id="harrySprite" class="sprite" src="harry_stand.jpg" alt="해리">
@@ -75,7 +75,7 @@
             <div id="harryHpText" class="hp-text">100 / 100</div>
         </div>
 
-        <!-- 볼드모트 진영 (수정됨: .jpg) -->
+        <!-- 볼드모트 진영 -->
         <div class="character-box">
             <div class="name">🐍 볼드모트</div>
             <img id="voldySprite" class="sprite" src="voldy_stand.jpg" alt="볼드모트">
@@ -88,14 +88,15 @@
         <div style="color: #f39c12;">[시스템] 결투가 시작되었습니다! 주문 버튼을 누르면 스탑워치가 켜집니다.</div>
     </div>
 
-    <!-- 해리 주문 버튼 (수정됨: .jpg) -->
+    <!-- 해리 주문 버튼 -->
     <div class="controls" id="buttons">
         <button class="spell-btn" onclick="startTiming('익스펙토')">
             <img src="icon_lightning.jpg" class="spell-icon" alt="스킬">
             Expelliarmus<br><span style="font-size:11px; color:#bdc3c7;">기본 공격</span>
         </button>
         <button class="spell-btn" onclick="startTiming('스투페파이')">
-            <img src="icon_swirl.jpg" class="spell-icon" alt="스킬">
+            <!-- 이 부분만 png로 수정됨! -->
+            <img src="icon_swirl.png" class="spell-icon" alt="스킬">
             Stupefy<br><span style="font-size:11px; color:#bdc3c7;">적 턴 스킵</span>
         </button>
         <button class="spell-btn" onclick="startTiming('프로테고')">
