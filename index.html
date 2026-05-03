@@ -17,603 +17,235 @@
     --warn: #f1c40f;
     --muted: #8899aa;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans KR', sans-serif; background: var(--dark-bg); color: white; min-height: 100vh; overflow-x: hidden; }
 
-  body {
-    font-family: 'Noto Sans KR', sans-serif;
-    background: var(--dark-bg);
-    color: white;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+  .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; }
+  .star  { position: absolute; background: white; border-radius: 50%; animation: twinkle linear infinite; }
+  @keyframes twinkle { 0%,100%{opacity:0.1;transform:scale(1)} 50%{opacity:0.9;transform:scale(1.4)} }
 
-  /* 배경 별빛 */
-  .stars {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    pointer-events: none;
-    z-index: 0;
-    overflow: hidden;
-  }
-  .star {
-    position: absolute;
-    background: white;
-    border-radius: 50%;
-    animation: twinkle linear infinite;
-  }
-  @keyframes twinkle {
-    0%,100% { opacity: 0.1; transform: scale(1); }
-    50% { opacity: 0.9; transform: scale(1.4); }
-  }
-
-  /* 배경 그라디언트 오로라 */
   body::before {
-    content: '';
-    position: fixed;
-    top: -50%; left: -50%;
-    width: 200%; height: 200%;
-    background: radial-gradient(ellipse at 20% 30%, rgba(74,158,255,0.04) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 70%, rgba(180,74,255,0.04) 0%, transparent 50%);
-    pointer-events: none;
-    z-index: 0;
-    animation: aurora 8s ease-in-out infinite alternate;
+    content: ''; position: fixed; top:-50%; left:-50%; width:200%; height:200%;
+    background: radial-gradient(ellipse at 20% 30%,rgba(74,158,255,0.04) 0%,transparent 50%),
+                radial-gradient(ellipse at 80% 70%,rgba(180,74,255,0.04) 0%,transparent 50%);
+    pointer-events:none; z-index:0; animation:aurora 8s ease-in-out infinite alternate;
   }
-  @keyframes aurora {
-    0% { transform: rotate(0deg) scale(1); }
-    100% { transform: rotate(5deg) scale(1.05); }
-  }
+  @keyframes aurora { 0%{transform:rotate(0deg) scale(1)} 100%{transform:rotate(5deg) scale(1.05)} }
 
-  .wrapper { position: relative; z-index: 1; max-width: 920px; margin: 0 auto; padding: 16px; }
+  .wrapper { position:relative; z-index:1; max-width:920px; margin:0 auto; padding:16px; }
 
-  .game-title {
-    font-family: 'Cinzel', serif;
-    font-size: 30px;
-    color: var(--gold);
-    text-align: center;
-    letter-spacing: 4px;
-    padding: 16px 0 4px;
-    text-shadow: 0 0 40px rgba(240,192,96,0.6), 0 0 80px rgba(240,192,96,0.2);
-  }
-  .game-subtitle {
-    text-align: center;
-    color: var(--muted);
-    font-size: 11px;
-    letter-spacing: 4px;
-    margin-bottom: 14px;
-  }
+  .game-title { font-family:'Cinzel',serif; font-size:30px; color:var(--gold); text-align:center; letter-spacing:4px; padding:16px 0 4px; text-shadow:0 0 40px rgba(240,192,96,0.6),0 0 80px rgba(240,192,96,0.2); }
+  .game-subtitle { text-align:center; color:var(--muted); font-size:11px; letter-spacing:4px; margin-bottom:14px; }
 
-  /* 상태 바 */
-  .status-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: var(--panel-bg);
-    border: 1px solid var(--panel-border);
-    border-radius: 8px;
-    padding: 8px 14px;
-    margin-bottom: 12px;
-    font-size: 13px;
-  }
-  #turnIndicator { font-weight: 700; font-size: 14px; color: var(--harry-color); }
-  .turn-count { color: var(--muted); font-size: 11px; }
+  .status-bar { display:flex; align-items:center; justify-content:space-between; background:var(--panel-bg); border:1px solid var(--panel-border); border-radius:8px; padding:8px 14px; margin-bottom:12px; font-size:13px; gap:8px; flex-wrap:wrap; }
+  #turnIndicator { font-weight:700; font-size:14px; color:var(--harry-color); }
+  .turn-count { color:var(--muted); font-size:11px; }
 
-  /* 연속 콤보 표시 */
-  .combo-area {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  #comboDisplay {
-    font-family: 'Cinzel', serif;
-    font-size: 13px;
-    color: var(--warn);
-    font-weight: 700;
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-  #comboDisplay.show { opacity: 1; }
+  .combo-area { display:flex; align-items:center; gap:6px; }
+  #comboDisplay { font-family:'Cinzel',serif; font-size:13px; color:var(--warn); font-weight:700; opacity:0; transition:opacity 0.3s; }
+  #comboDisplay.show { opacity:1; }
 
-  .sound-btn {
-    background: none;
-    border: 1px solid var(--panel-border);
-    color: var(--muted);
-    border-radius: 6px;
-    padding: 4px 10px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: 0.2s;
-  }
-  .sound-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .sound-btn { background:none; border:1px solid var(--panel-border); color:var(--muted); border-radius:6px; padding:4px 10px; cursor:pointer; font-size:16px; transition:0.2s; }
+  .sound-btn:hover { border-color:var(--gold); color:var(--gold); }
 
-  /* 결투장 */
-  .battlefield {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    gap: 10px;
-    align-items: center;
-    margin-bottom: 12px;
-  }
+  .battlefield { display:grid; grid-template-columns:1fr auto 1fr; gap:10px; align-items:center; margin-bottom:12px; }
 
-  .fighter-panel {
-    background: var(--panel-bg);
-    border: 1px solid var(--panel-border);
-    border-radius: 12px;
-    padding: 14px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 7px;
-    transition: border-color 0.3s, box-shadow 0.3s;
-    position: relative;
-    overflow: hidden;
-  }
-  .fighter-panel.harry-panel { border-left: 3px solid var(--harry-color); }
-  .fighter-panel.voldy-panel { border-right: 3px solid var(--voldy-color); }
-  .fighter-panel.active-turn { box-shadow: 0 0 25px rgba(240,192,96,0.15); border-color: var(--gold); }
+  .fighter-panel { background:var(--panel-bg); border:1px solid var(--panel-border); border-radius:12px; padding:14px; display:flex; flex-direction:column; align-items:center; gap:7px; transition:border-color 0.3s,box-shadow 0.3s; position:relative; overflow:hidden; }
+  .fighter-panel.harry-panel { border-left:3px solid var(--harry-color); }
+  .fighter-panel.voldy-panel { border-right:3px solid var(--voldy-color); }
+  .fighter-panel.active-turn { box-shadow:0 0 25px rgba(240,192,96,0.15); border-color:var(--gold); }
 
-  .fighter-name { font-family: 'Cinzel', serif; font-size: 13px; font-weight: 700; letter-spacing: 1px; }
-  .harry-panel .fighter-name { color: var(--harry-color); }
-  .voldy-panel .fighter-name { color: var(--voldy-color); }
+  .fighter-name { font-family:'Cinzel',serif; font-size:13px; font-weight:700; letter-spacing:1px; }
+  .harry-panel .fighter-name { color:var(--harry-color); }
+  .voldy-panel .fighter-name { color:var(--voldy-color); }
 
-  /* 레벨/경험치 */
-  .level-badge {
-    font-size: 10px;
-    background: rgba(240,192,96,0.15);
-    border: 1px solid rgba(240,192,96,0.3);
-    color: var(--gold);
-    padding: 1px 7px;
-    border-radius: 8px;
-    font-weight: 700;
-  }
+  .level-badge { font-size:10px; background:rgba(240,192,96,0.15); border:1px solid rgba(240,192,96,0.3); color:var(--gold); padding:1px 7px; border-radius:8px; font-weight:700; }
 
-  .sprite-area {
-    width: 140px;
-    height: 180px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-  }
-  .sprite-img {
-    width: 140px;
-    height: 180px;
-    object-fit: contain;
-    image-rendering: pixelated;
-    transition: filter 0.15s;
-  }
+  .sprite-area { width:140px; height:180px; display:flex; align-items:center; justify-content:center; position:relative; }
+  .sprite-img { width:140px; height:180px; object-fit:contain; image-rendering:pixelated; transition:filter 0.15s; }
 
-  /* 상태이상 */
-  .status-badges { display: flex; gap: 3px; flex-wrap: wrap; justify-content: center; min-height: 22px; }
-  .badge { font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 700; }
-  .badge-poison  { background: rgba(180,74,255,0.15); color: #b44aff; border: 1px solid #b44aff; }
-  .badge-stun    { background: rgba(241,196,15,0.15); color: var(--warn); border: 1px solid var(--warn); }
-  .badge-shield  { background: rgba(74,158,255,0.15); color: var(--harry-color); border: 1px solid var(--harry-color); }
-  .badge-burn    { background: rgba(231,76,60,0.15); color: #e74c3c; border: 1px solid #e74c3c; }
-  .badge-regen   { background: rgba(46,204,113,0.15); color: #2ecc71; border: 1px solid #2ecc71; }
+  .status-badges { display:flex; gap:3px; flex-wrap:wrap; justify-content:center; min-height:22px; }
+  .badge { font-size:10px; padding:2px 7px; border-radius:10px; font-weight:700; }
+  .badge-poison { background:rgba(180,74,255,0.15); color:#b44aff; border:1px solid #b44aff; }
+  .badge-stun   { background:rgba(241,196,15,0.15);  color:var(--warn); border:1px solid var(--warn); }
+  .badge-shield { background:rgba(74,158,255,0.15);  color:var(--harry-color); border:1px solid var(--harry-color); }
+  .badge-burn   { background:rgba(231,76,60,0.15);   color:#e74c3c; border:1px solid #e74c3c; }
+  .badge-regen  { background:rgba(46,204,113,0.15);  color:#2ecc71; border:1px solid #2ecc71; }
 
-  /* HP/MP 바 */
-  .hp-section { width: 100%; }
-  .hp-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 3px; }
-  .hp-label .hp-num { font-weight: 700; color: white; font-size: 12px; }
-  .hp-track { width: 100%; height: 9px; background: rgba(255,255,255,0.07); border-radius: 5px; overflow: hidden; border: 1px solid rgba(255,255,255,0.04); }
-  .hp-fill { height: 100%; border-radius: 5px; transition: width 0.4s ease, background-color 0.4s; position: relative; overflow: hidden; }
-  /* 반짝이 효과 */
-  .hp-fill::after {
-    content: '';
-    position: absolute;
-    top: 0; left: -60%; width: 50%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-    animation: shimmer 2s ease-in-out infinite;
-  }
-  @keyframes shimmer { 0% { left: -60%; } 100% { left: 120%; } }
+  .hp-section { width:100%; }
+  .hp-label { display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-bottom:3px; }
+  .hp-label .hp-num { font-weight:700; color:white; font-size:12px; }
+  .hp-track { width:100%; height:9px; background:rgba(255,255,255,0.07); border-radius:5px; overflow:hidden; border:1px solid rgba(255,255,255,0.04); }
+  .hp-fill { height:100%; border-radius:5px; transition:width 0.4s ease,background-color 0.4s; position:relative; overflow:hidden; }
+  .hp-fill::after { content:''; position:absolute; top:0; left:-60%; width:50%; height:100%; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent); animation:shimmer 2s ease-in-out infinite; }
+  @keyframes shimmer { 0%{left:-60%} 100%{left:120%} }
 
-  .mp-track { width: 100%; height: 5px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; margin-top: 3px; }
-  .mp-fill { height: 100%; background: linear-gradient(90deg, #4a9eff, #a44aff); border-radius: 3px; transition: width 0.4s; }
-  .mp-label { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .mp-track { width:100%; height:5px; background:rgba(255,255,255,0.05); border-radius:3px; overflow:hidden; margin-top:3px; }
+  .mp-fill { height:100%; background:linear-gradient(90deg,#4a9eff,#a44aff); border-radius:3px; transition:width 0.4s; }
+  .mp-label { font-size:10px; color:var(--muted); margin-top:2px; }
 
-  /* EXP 바 */
-  .exp-track { width: 100%; height: 3px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden; margin-top: 3px; }
-  .exp-fill { height: 100%; background: linear-gradient(90deg, var(--gold), #ff9d4a); border-radius: 2px; transition: width 0.6s ease; }
+  .exp-track { width:100%; height:3px; background:rgba(255,255,255,0.05); border-radius:2px; overflow:hidden; margin-top:3px; }
+  .exp-fill { height:100%; background:linear-gradient(90deg,var(--gold),#ff9d4a); border-radius:2px; transition:width 0.6s ease; }
 
-  /* VS */
-  .vs-center { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-  .vs-text { font-family: 'Cinzel', serif; font-size: 20px; color: var(--gold); font-weight: 900; }
-  #turnBadge { font-size: 10px; padding: 3px 8px; background: rgba(240,192,96,0.08); border: 1px solid rgba(240,192,96,0.25); border-radius: 10px; color: var(--gold); text-align: center; min-width: 60px; }
+  .vs-center { display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .vs-text { font-family:'Cinzel',serif; font-size:20px; color:var(--gold); font-weight:900; }
+  #turnBadge { font-size:10px; padding:3px 8px; background:rgba(240,192,96,0.08); border:1px solid rgba(240,192,96,0.25); border-radius:10px; color:var(--gold); text-align:center; min-width:60px; }
 
-  /* 로그박스 */
-  #logBox {
-    background: var(--panel-bg);
-    border: 1px solid var(--panel-border);
-    border-radius: 10px;
-    height: 100px;
-    overflow-y: auto;
-    padding: 8px 12px;
-    font-size: 12px;
-    line-height: 1.7;
-    margin-bottom: 12px;
-  }
-  #logBox::-webkit-scrollbar { width: 3px; }
-  #logBox::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 2px; }
-  .log-entry { margin-bottom: 1px; }
+  #logBox { background:var(--panel-bg); border:1px solid var(--panel-border); border-radius:10px; height:100px; overflow-y:auto; padding:8px 12px; font-size:12px; line-height:1.7; margin-bottom:12px; }
+  #logBox::-webkit-scrollbar { width:3px; }
+  #logBox::-webkit-scrollbar-thumb { background:var(--panel-border); border-radius:2px; }
+  .log-entry { margin-bottom:1px; }
 
-  /* 주문 버튼 */
-  .spell-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-    margin-bottom: 10px;
-  }
+  .spell-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:10px; }
 
-  .spell-btn {
-    background: var(--panel-bg);
-    border: 1px solid var(--panel-border);
-    border-radius: 10px;
-    padding: 10px 6px;
-    cursor: pointer;
-    color: white;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-    transition: all 0.2s;
-    position: relative;
-    overflow: hidden;
-  }
-  .spell-btn::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
-  .spell-btn:hover:not(:disabled) { transform: translateY(-3px); }
-  .spell-btn:hover:not(:disabled)::before { opacity: 1; }
-  .spell-btn:disabled { opacity: 0.38; cursor: not-allowed; transform: none; }
+  .spell-btn { background:var(--panel-bg); border:1px solid var(--panel-border); border-radius:10px; padding:10px 6px; cursor:pointer; color:white; display:flex; flex-direction:column; align-items:center; gap:5px; transition:all 0.2s; position:relative; overflow:hidden; }
+  .spell-btn::before { content:''; position:absolute; top:0;left:0;right:0; height:2px; opacity:0; transition:opacity 0.2s; }
+  .spell-btn:hover:not(:disabled) { transform:translateY(-3px); }
+  .spell-btn:hover:not(:disabled)::before { opacity:1; }
+  .spell-btn:disabled { opacity:0.38; cursor:not-allowed; transform:none; }
 
-  .spell-btn.s-expel::before { background: var(--harry-color); }
-  .spell-btn.s-expel:hover:not(:disabled) { border-color: var(--harry-color); box-shadow: 0 6px 18px rgba(74,158,255,0.2); }
-  .spell-btn.s-stupefy::before { background: var(--warn); }
-  .spell-btn.s-stupefy:hover:not(:disabled) { border-color: var(--warn); box-shadow: 0 6px 18px rgba(241,196,15,0.2); }
-  .spell-btn.s-protego::before { background: var(--success); }
-  .spell-btn.s-protego:hover:not(:disabled) { border-color: var(--success); box-shadow: 0 6px 18px rgba(46,204,113,0.2); }
-  .spell-btn.s-avada::before { background: #8e44ad; }
-  .spell-btn.s-avada:hover:not(:disabled) { border-color: #8e44ad; box-shadow: 0 6px 18px rgba(142,68,173,0.3); }
-  .spell-btn.s-lumos::before { background: #fff176; }
-  .spell-btn.s-lumos:hover:not(:disabled) { border-color: #fff176; box-shadow: 0 6px 18px rgba(255,241,118,0.25); }
-  .spell-btn.s-incendio::before { background: #ff6b35; }
-  .spell-btn.s-incendio:hover:not(:disabled) { border-color: #ff6b35; box-shadow: 0 6px 18px rgba(255,107,53,0.25); }
-  .spell-btn.s-rest::before { background: #95a5a6; }
-  .spell-btn.s-rest:hover:not(:disabled) { border-color: #95a5a6; box-shadow: 0 6px 18px rgba(149, 165, 166, 0.25); }
+  .spell-btn.s-expel::before   { background:var(--harry-color); }
+  .spell-btn.s-expel:hover:not(:disabled)    { border-color:var(--harry-color); box-shadow:0 6px 18px rgba(74,158,255,0.2); }
+  .spell-btn.s-stupefy::before { background:var(--warn); }
+  .spell-btn.s-stupefy:hover:not(:disabled)  { border-color:var(--warn); box-shadow:0 6px 18px rgba(241,196,15,0.2); }
+  .spell-btn.s-protego::before { background:var(--success); }
+  .spell-btn.s-protego:hover:not(:disabled)  { border-color:var(--success); box-shadow:0 6px 18px rgba(46,204,113,0.2); }
+  .spell-btn.s-avada::before   { background:#8e44ad; }
+  .spell-btn.s-avada:hover:not(:disabled)    { border-color:#8e44ad; box-shadow:0 6px 18px rgba(142,68,173,0.3); }
+  .spell-btn.s-lumos::before   { background:#fff176; }
+  .spell-btn.s-lumos:hover:not(:disabled)    { border-color:#fff176; box-shadow:0 6px 18px rgba(255,241,118,0.25); }
+  .spell-btn.s-incendio::before { background:#ff6b35; }
+  .spell-btn.s-incendio:hover:not(:disabled) { border-color:#ff6b35; box-shadow:0 6px 18px rgba(255,107,53,0.25); }
 
-  .spell-icon-img { width: 46px; height: 46px; object-fit: cover; border-radius: 7px; border: 1px solid rgba(255,255,255,0.1); }
-  .spell-name { font-family: 'Cinzel', serif; font-size: 10px; font-weight: 700; letter-spacing: 0.4px; text-align: center; }
-  .spell-desc { font-size: 9px; color: var(--muted); text-align: center; line-height: 1.3; }
-  .spell-cooldown { position: absolute; top: 3px; right: 5px; font-size: 9px; color: var(--warn); font-weight: 700; }
-  .spell-mp-cost { position: absolute; top: 3px; left: 5px; font-size: 9px; color: #7799ff; }
+  .spell-icon-img { width:46px; height:46px; object-fit:cover; border-radius:7px; border:1px solid rgba(255,255,255,0.1); }
+  .spell-name { font-family:'Cinzel',serif; font-size:10px; font-weight:700; letter-spacing:0.4px; text-align:center; }
+  .spell-desc { font-size:9px; color:var(--muted); text-align:center; line-height:1.3; }
+  .spell-cooldown { position:absolute; top:3px; right:5px; font-size:9px; color:var(--warn); font-weight:700; }
+  .spell-mp-cost  { position:absolute; top:3px; left:5px;  font-size:9px; color:#7799ff; }
 
-  /* ════ 타이밍 오버레이 ════ */
+  /* ── 타이밍 오버레이 ── */
   #timingOverlay {
-    display: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.95);
-    z-index: 9999;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 18px;
-    backdrop-filter: blur(10px);
+    display:none; position:fixed; top:0;left:0; width:100%;height:100%;
+    background:rgba(0,0,0,0.95); z-index:9999;
+    flex-direction:column; align-items:center; justify-content:center; gap:18px;
+    backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
   }
-
-  .timing-title {
-    font-family: 'Cinzel', serif;
-    font-size: 20px;
-    color: var(--gold);
-    letter-spacing: 2px;
-  }
-
-  /* 목표 시간 표시 */
+  .timing-title { font-family:'Cinzel',serif; font-size:20px; color:var(--gold); letter-spacing:2px; }
   .timing-target-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 12px;
-    padding: 10px 24px;
+    display:flex; align-items:center; gap:12px;
+    background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+    border-radius:12px; padding:10px 24px;
   }
-  .target-time {
-    font-family: 'Cinzel', serif;
-    font-size: 36px;
-    font-weight: 900;
-    color: var(--gold);
-    text-shadow: 0 0 20px rgba(240,192,96,0.5);
-  }
-  .target-label { color: var(--muted); font-size: 12px; text-align: center; line-height: 1.6; }
-
-  /* 정밀도 범위 표시 (극악 모드 반영) */
-  .precision-hints {
-    display: flex;
-    gap: 16px;
-    font-size: 11px;
-  }
-  .ph { padding: 4px 12px; border-radius: 8px; text-align: center; }
-  .ph-crit { background: rgba(241,196,15,0.12); border: 1px solid var(--warn); color: var(--warn); }
-  .ph-norm { background: rgba(46,204,113,0.1); border: 1px solid var(--success); color: var(--success); }
-  .ph-miss { background: rgba(255,255,255,0.05); border: 1px solid var(--muted); color: var(--muted); }
+  .target-time { font-family:'Cinzel',serif; font-size:36px; font-weight:900; color:var(--gold); text-shadow:0 0 20px rgba(240,192,96,0.5); }
+  .target-label { color:var(--muted); font-size:12px; text-align:center; line-height:1.6; }
+  .precision-hints { display:flex; gap:16px; font-size:11px; }
+  .ph { padding:4px 12px; border-radius:8px; text-align:center; }
+  .ph-crit { background:rgba(241,196,15,0.12); border:1px solid var(--warn); color:var(--warn); }
+  .ph-norm { background:rgba(46,204,113,0.1); border:1px solid var(--success); color:var(--success); }
+  .ph-miss { background:rgba(255,255,255,0.05); border:1px solid var(--muted); color:var(--muted); }
 
   #stopwatchDisplay {
-    font-family: 'Cinzel', monospace;
-    font-size: 82px;
-    font-weight: 900;
-    color: white;
-    transition: color 0.08s;
-    text-shadow: 0 0 40px rgba(255,255,255,0.2);
-    letter-spacing: -2px;
-    min-width: 260px;
-    text-align: center;
+    font-family:'Cinzel',monospace; font-size:82px; font-weight:900; color:white;
+    /* ✅ transition 제거 — RAF 루프와 충돌 방지 */
+    text-shadow:0 0 40px rgba(255,255,255,0.2); letter-spacing:-2px;
+    min-width:260px; text-align:center;
+    /* will-change로 GPU 레이어 강제 → iPhone 렌더 드롭 방지 */
+    will-change:color;
   }
 
-  /* 정밀 타이밍 바 */
+  /* ✅ 타이밍 바: transition 완전 제거 (RAF로 직접 제어) */
   .timing-bar-wrap {
-    position: relative;
-    width: 340px;
-    height: 16px;
-    background: rgba(255,255,255,0.06);
-    border-radius: 8px;
-    overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.08);
+    position:relative; width:340px; height:16px;
+    background:rgba(255,255,255,0.06); border-radius:8px; overflow:hidden;
+    border:1px solid rgba(255,255,255,0.08);
   }
-  /* 크리티컬 존 (금색) */
-  .timing-zone-crit {
-    position: absolute;
-    height: 100%;
-    background: rgba(241,196,15,0.35);
-    border-radius: 4px;
-  }
-  /* 노말 존 (녹색) */
-  .timing-zone-norm {
-    position: absolute;
-    height: 100%;
-    background: rgba(46,204,113,0.2);
-    border-radius: 4px;
-  }
+  .timing-zone-crit { position:absolute; height:100%; background:rgba(241,196,15,0.35); border-radius:4px; }
+  .timing-zone-norm { position:absolute; height:100%; background:rgba(46,204,113,0.2);  border-radius:4px; }
   .timing-cursor {
-    position: absolute;
-    top: 0;
-    width: 3px;
-    height: 100%;
-    background: white;
-    border-radius: 2px;
-    box-shadow: 0 0 8px white;
-    transition: left 0.016s linear;
-    left: 0;
+    position:absolute; top:0;
+    width:4px; height:100%;
+    background:white; border-radius:2px;
+    box-shadow:0 0 8px white, 0 0 16px rgba(255,255,255,0.5);
+    /* ✅ transition 제거 — RAF가 직접 left 세팅 */
+    will-change:transform;
   }
-  /* 목표 마커 */
-  .timing-marker {
-    position: absolute;
-    top: -4px;
-    width: 2px;
-    height: calc(100% + 8px);
-    background: var(--gold);
-    border-radius: 1px;
-    box-shadow: 0 0 6px var(--gold);
-  }
+  .timing-marker { position:absolute; top:-4px; width:2px; height:calc(100% + 8px); background:var(--gold); border-radius:1px; box-shadow:0 0 6px var(--gold); }
 
   .stop-btn {
-    background: rgba(231,76,60,0.12);
-    border: 2px solid var(--danger);
-    color: white;
-    border-radius: 50%;
-    width: 110px;
-    height: 110px;
-    font-family: 'Cinzel', serif;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: 0.12s;
-    letter-spacing: 1px;
-    position: relative;
-    overflow: hidden;
+    background:rgba(231,76,60,0.12); border:2px solid var(--danger); color:white;
+    border-radius:50%; width:110px; height:110px;
+    font-family:'Cinzel',serif; font-size:16px; font-weight:700;
+    cursor:pointer; transition:0.12s; letter-spacing:1px;
+    /* 모바일 터치 지연 제거 */
+    touch-action:manipulation; -webkit-tap-highlight-color:transparent;
   }
-  .stop-btn::before {
-    content: '';
-    position: absolute;
-    top: 50%; left: 50%;
-    width: 0; height: 0;
-    background: rgba(231,76,60,0.3);
-    border-radius: 50%;
-    transform: translate(-50%,-50%);
-    transition: width 0.3s, height 0.3s;
-  }
-  .stop-btn:active::before { width: 200px; height: 200px; }
-  .stop-btn:hover { border-color: #ff6b5b; box-shadow: 0 0 20px rgba(231,76,60,0.3); }
+  .stop-btn:hover { border-color:#ff6b5b; box-shadow:0 0 20px rgba(231,76,60,0.3); }
+  .stop-btn:active { transform:scale(0.93); background:rgba(231,76,60,0.35); }
 
   /* 결과 플래시 */
-  #resultFlash {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    pointer-events: none;
-    z-index: 10000;
-    opacity: 0;
-  }
-  #resultFlash.crit { background: rgba(241,196,15,0.15); animation: flashAnim 0.4s ease; }
-  #resultFlash.hit  { background: rgba(46,204,113,0.1); animation: flashAnim 0.4s ease; }
-  #resultFlash.miss { background: rgba(255,255,255,0.05); animation: flashAnim 0.3s ease; }
-  @keyframes flashAnim { 0% { opacity: 1; } 100% { opacity: 0; } }
+  #resultFlash { position:fixed; top:0;left:0;width:100%;height:100%; pointer-events:none; z-index:10000; opacity:0; }
+  #resultFlash.crit { background:rgba(241,196,15,0.15); animation:flashAnim 0.4s ease; }
+  #resultFlash.hit  { background:rgba(46,204,113,0.1);  animation:flashAnim 0.4s ease; }
+  #resultFlash.miss { background:rgba(255,255,255,0.05);animation:flashAnim 0.3s ease; }
+  @keyframes flashAnim { 0%{opacity:1} 100%{opacity:0} }
 
-  /* 연속 도전 UI */
-  #streakDisplay {
-    font-size: 11px;
-    color: var(--muted);
-    text-align: center;
-  }
-  #streakDisplay span { color: var(--gold); font-weight: 700; }
+  #streakDisplay { font-size:11px; color:var(--muted); text-align:center; }
+  #streakDisplay span { color:var(--gold); font-weight:700; }
 
-  /* 게임오버 */
-  #gameoverOverlay {
-    display: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.9);
-    z-index: 9998;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    backdrop-filter: blur(12px);
-  }
-  .gameover-title { font-family: 'Cinzel', serif; font-size: 38px; font-weight: 900; letter-spacing: 4px; }
-  .gameover-sub { color: var(--muted); font-size: 15px; letter-spacing: 1px; }
-  .gameover-stats {
-    background: var(--panel-bg);
-    border: 1px solid var(--panel-border);
-    border-radius: 12px;
-    padding: 16px 32px;
-    text-align: center;
-    line-height: 2;
-    font-size: 13px;
-    color: var(--muted);
-  }
-  .gameover-stats b { color: white; }
-  .retry-btn {
-    background: var(--panel-bg);
-    border: 2px solid var(--gold);
-    color: var(--gold);
-    font-family: 'Cinzel', serif;
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    padding: 12px 36px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: 0.2s;
-    margin-top: 6px;
-  }
-  .retry-btn:hover { background: rgba(240,192,96,0.1); transform: translateY(-2px); }
+  #gameoverOverlay { display:none; position:fixed; top:0;left:0;width:100%;height:100%; background:rgba(0,0,0,0.9); z-index:9998; flex-direction:column; align-items:center; justify-content:center; gap:16px; backdrop-filter:blur(12px); }
+  .gameover-title { font-family:'Cinzel',serif; font-size:38px; font-weight:900; letter-spacing:4px; }
+  .gameover-sub { color:var(--muted); font-size:15px; letter-spacing:1px; }
+  .gameover-stats { background:var(--panel-bg); border:1px solid var(--panel-border); border-radius:12px; padding:16px 32px; text-align:center; line-height:2; font-size:13px; color:var(--muted); }
+  .gameover-stats b { color:white; }
+  .retry-btn { background:var(--panel-bg); border:2px solid var(--gold); color:var(--gold); font-family:'Cinzel',serif; font-size:15px; font-weight:700; letter-spacing:2px; padding:12px 36px; border-radius:8px; cursor:pointer; transition:0.2s; margin-top:6px; touch-action:manipulation; }
+  .retry-btn:hover { background:rgba(240,192,96,0.1); transform:translateY(-2px); }
 
-  /* 레벨업 오버레이 */
-  #levelupOverlay {
-    display: none;
-    position: fixed;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    background: var(--panel-bg);
-    border: 2px solid var(--gold);
-    border-radius: 16px;
-    padding: 24px 40px;
-    z-index: 9997;
-    text-align: center;
-    animation: levelupAnim 0.4s ease;
-    box-shadow: 0 0 60px rgba(240,192,96,0.3);
-  }
-  @keyframes levelupAnim {
-    0% { transform: translate(-50%,-50%) scale(0.5); opacity: 0; }
-    100% { transform: translate(-50%,-50%) scale(1); opacity: 1; }
-  }
-  .levelup-title { font-family: 'Cinzel', serif; font-size: 22px; color: var(--gold); margin-bottom: 8px; }
-  .levelup-desc { color: white; font-size: 14px; }
+  #levelupOverlay { display:none; position:fixed; top:50%;left:50%; transform:translate(-50%,-50%); background:var(--panel-bg); border:2px solid var(--gold); border-radius:16px; padding:24px 40px; z-index:9997; text-align:center; animation:levelupAnim 0.4s ease; box-shadow:0 0 60px rgba(240,192,96,0.3); pointer-events:none; }
+  @keyframes levelupAnim { 0%{transform:translate(-50%,-50%) scale(0.5);opacity:0} 100%{transform:translate(-50%,-50%) scale(1);opacity:1} }
+  .levelup-title { font-family:'Cinzel',serif; font-size:22px; color:var(--gold); margin-bottom:8px; }
+  .levelup-desc { color:white; font-size:14px; }
 
-  /* 볼드모트 생각중 */
-  #voldyThinking {
-    font-size: 11px;
-    color: var(--voldy-color);
-    text-align: center;
-    height: 16px;
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-  #voldyThinking.visible { opacity: 1; }
+  #voldyThinking { font-size:11px; color:var(--voldy-color); text-align:center; height:16px; opacity:0; transition:opacity 0.3s; }
+  #voldyThinking.visible { opacity:1; }
 
-  /* 소리 토스트 */
-  #soundToast {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: var(--panel-bg);
-    border: 1px solid var(--panel-border);
-    border-radius: 8px;
-    padding: 10px 18px;
-    font-size: 12px;
-    color: white;
-    opacity: 0;
-    transition: all 0.3s;
-    z-index: 9999;
-    pointer-events: none;
-    max-width: 300px;
-    text-align: center;
-    line-height: 1.5;
-  }
-  #soundToast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  #soundToast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--panel-bg); border:1px solid var(--panel-border); border-radius:8px; padding:10px 18px; font-size:12px; color:white; opacity:0; transition:all 0.3s; z-index:9999; pointer-events:none; max-width:300px; text-align:center; line-height:1.5; }
+  #soundToast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
-  /* 애니메이션 */
-  @keyframes shake {
-    0%,100% { transform: translateX(0); }
-    15% { transform: translateX(-8px) rotate(-1deg); }
-    30% { transform: translateX(8px) rotate(1deg); }
-    45% { transform: translateX(-5px); }
-    60% { transform: translateX(5px); }
-    75% { transform: translateX(-2px); }
-  }
-  @keyframes cast-attack { 0% { transform: translateX(0); } 30% { transform: translateX(18px) scale(1.15); } 100% { transform: translateX(0) scale(1); } }
-  @keyframes cast-voldy  { 0% { transform: translateX(0); } 30% { transform: translateX(-18px) scale(1.15); } 100% { transform: translateX(0) scale(1); } }
-  @keyframes hit-flash   { 0%,100% { filter: brightness(1); } 50% { filter: brightness(2.5) saturate(0.2); } }
-  @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 15%{transform:translateX(-8px) rotate(-1deg)} 30%{transform:translateX(8px) rotate(1deg)} 45%{transform:translateX(-5px)} 60%{transform:translateX(5px)} 75%{transform:translateX(-2px)} }
+  @keyframes cast-attack { 0%{transform:translateX(0)} 30%{transform:translateX(18px) scale(1.15)} 100%{transform:translateX(0) scale(1)} }
+  @keyframes cast-voldy  { 0%{transform:translateX(0)} 30%{transform:translateX(-18px) scale(1.15)} 100%{transform:translateX(0) scale(1)} }
+  @keyframes hit-flash   { 0%,100%{filter:brightness(1)} 50%{filter:brightness(2.5) saturate(0.2)} }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+  .hit-anim    { animation:shake 0.5s ease; }
+  .attack-anim { animation:cast-attack 0.5s ease; }
+  .vatk-anim   { animation:cast-voldy 0.5s ease; }
+  .flash-anim  { animation:hit-flash 0.4s ease; }
+  .float-anim  { animation:float 2s ease-in-out infinite; }
 
-  .hit-anim     { animation: shake 0.5s ease; }
-  .attack-anim  { animation: cast-attack 0.5s ease; }
-  .vatk-anim    { animation: cast-voldy 0.5s ease; }
-  .flash-anim   { animation: hit-flash 0.4s ease; }
-  .float-anim   { animation: float 2s ease-in-out infinite; }
+  .dmg-popup { position:absolute; top:10px; font-family:'Cinzel',serif; font-size:20px; font-weight:900; pointer-events:none; animation:dmgFloat 1.2s ease forwards; z-index:100; text-shadow:0 2px 8px rgba(0,0,0,0.8); }
+  @keyframes dmgFloat { 0%{transform:translateY(0) scale(0.5);opacity:1} 60%{transform:translateY(-50px) scale(1.2);opacity:1} 100%{transform:translateY(-80px) scale(1);opacity:0} }
 
-  /* 데미지 팝업 */
-  .dmg-popup {
-    position: absolute;
-    top: 10px;
-    font-family: 'Cinzel', serif;
-    font-size: 20px;
-    font-weight: 900;
-    pointer-events: none;
-    animation: dmgFloat 1.2s ease forwards;
-    z-index: 100;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.8);
-  }
-  @keyframes dmgFloat {
-    0% { transform: translateY(0) scale(0.5); opacity: 1; }
-    60% { transform: translateY(-50px) scale(1.2); opacity: 1; }
-    100% { transform: translateY(-80px) scale(1); opacity: 0; }
-  }
-
-  @media (max-width: 620px) {
-    .spell-grid { grid-template-columns: repeat(3, 1fr); }
-    #stopwatchDisplay { font-size: 56px; }
-    .gameover-title { font-size: 26px; }
-    .game-title { font-size: 22px; }
-    .timing-bar-wrap { width: 260px; }
-    .target-time { font-size: 28px; }
+  @media (max-width:620px) {
+    .spell-grid { grid-template-columns:repeat(3,1fr); }
+    #stopwatchDisplay { font-size:56px; }
+    .gameover-title { font-size:26px; }
+    .game-title { font-size:22px; }
+    .timing-bar-wrap { width:280px; }
+    .target-time { font-size:28px; }
+    .precision-hints { gap:8px; }
+    .ph { padding:3px 8px; font-size:10px; }
   }
 </style>
 </head>
 <body>
 
-<!-- 🎵 오디오 플레이어 추가 (bgm.mp3) -->
-<audio id="bgmAudio" src="bgm.mp3" loop></audio>
-
-<!-- 별빛 배경 -->
 <div class="stars" id="stars"></div>
 <div id="resultFlash"></div>
 
 <div class="wrapper">
-
   <div class="game-title">⚡ 해리포터 VS 볼드모트 ⚡</div>
   <div class="game-subtitle">WIZARD'S DUEL — HOGWARTS EDITION</div>
 
-  <!-- 상태 바 -->
   <div class="status-bar">
     <div>
       <div id="turnIndicator">👓 해리의 턴</div>
@@ -624,15 +256,12 @@
       <div id="voldyThinking">🐍 볼드모트가 주문을 고르는 중...</div>
     </div>
     <div style="display:flex;gap:6px;align-items:center;">
-      <div id="streakDisplay">연속 크리: <span id="streakNum">0</span></div>
+      <div id="streakDisplay">최고콤보: <span id="bestComboNum">0</span></div>
       <button class="sound-btn" onclick="showSoundGuide()" title="안내">🔊</button>
     </div>
   </div>
 
-  <!-- 결투장 -->
   <div class="battlefield">
-
-    <!-- 해리 -->
     <div class="fighter-panel harry-panel active-turn" id="harryPanel">
       <div class="fighter-name">👓 HARRY POTTER</div>
       <div class="level-badge" id="harryLvBadge">Lv.1</div>
@@ -649,13 +278,11 @@
       </div>
     </div>
 
-    <!-- VS -->
     <div class="vs-center">
       <div class="vs-text">VS</div>
       <div id="turnBadge">⚔ 결투 중</div>
     </div>
 
-    <!-- 볼드모트 -->
     <div class="fighter-panel voldy-panel" id="voldyPanel">
       <div class="fighter-name">🐍 VOLDEMORT</div>
       <div class="level-badge" id="voldyLvBadge">Lv.1</div>
@@ -664,7 +291,7 @@
       </div>
       <div class="status-badges" id="voldyBadges"></div>
       <div class="hp-section">
-        <div class="hp-label"><span>HP</span><span class="hp-num" id="voldyHpNum">300 / 300</span></div>
+        <div class="hp-label"><span>HP</span><span class="hp-num" id="voldyHpNum">150 / 150</span></div>
         <div class="hp-track"><div class="hp-fill" id="voldyHpBar" style="width:100%;background:#2ecc71;"></div></div>
         <div class="mp-track" style="background:rgba(180,74,255,0.12);">
           <div class="mp-fill" id="voldyMpBar" style="width:100%;background:linear-gradient(90deg,#8e44ad,#b44aff);"></div>
@@ -675,12 +302,10 @@
     </div>
   </div>
 
-  <!-- 로그 -->
   <div id="logBox">
     <div class="log-entry" style="color:#f0c060;">⚡ 결투가 시작되었습니다! 타이밍을 맞춰 주문을 선택하세요.</div>
   </div>
 
-  <!-- 주문 버튼 (7개) -->
   <div class="spell-grid" id="spellGrid">
     <button class="spell-btn s-expel" onclick="startTiming('익스펙토')">
       <span class="spell-mp-cost">20MP</span>
@@ -690,7 +315,7 @@
     </button>
     <button class="spell-btn s-stupefy" onclick="startTiming('스투페파이')">
       <span class="spell-mp-cost">25MP</span>
-      <img src="icon_swirl.jpg" class="spell-icon-img" alt="소용돌이">
+      <img src="icon_swirl.png" class="spell-icon-img" alt="소용돌이">
       <span class="spell-name">Stupefy</span>
       <span class="spell-desc">피해 18<br>적 턴 스킵</span>
     </button>
@@ -698,14 +323,13 @@
       <span class="spell-mp-cost">15MP</span>
       <img src="icon_shield.jpg" class="spell-icon-img" alt="방패">
       <span class="spell-name">Protego</span>
-      <span class="spell-desc">회복 20<br>방어막 1턴</span>
+      <span class="spell-desc">회복 20<br>방어막+재생</span>
     </button>
     <button class="spell-btn s-avada" onclick="startTiming('아바다')" id="btnAvada">
       <span class="spell-mp-cost">50MP</span>
       <span style="font-size:32px;line-height:1;">☠️</span>
       <span class="spell-name">Avada Kedavra</span>
-      <!-- 💡 툴팁 수정: 데미지가 100~150으로 표시됩니다 -->
-      <span class="spell-desc">피해 100~150<br>쿨타임 3턴</span>
+      <span class="spell-desc">피해 50<br>쿨타임 3턴</span>
     </button>
     <button class="spell-btn s-lumos" onclick="startTiming('루모스')" id="btnLumos">
       <span class="spell-mp-cost">30MP</span>
@@ -719,57 +343,40 @@
       <span class="spell-name">Incendio</span>
       <span class="spell-desc">피해 30<br>화상 2턴</span>
     </button>
-    <button class="spell-btn s-rest" onclick="skipTurn()">
-      <span class="spell-mp-cost" style="color:#2ecc71;">0MP</span>
-      <span style="font-size:32px;line-height:1;">💤</span>
-      <span class="spell-name">Rest</span>
-      <span class="spell-desc">턴 넘기기<br>MP 30 추가회복</span>
-    </button>
   </div>
-
-</div><!-- /wrapper -->
+</div>
 
 <!-- 타이밍 오버레이 -->
 <div id="timingOverlay">
   <div class="timing-title" id="timingSpellName">✨ Expelliarmus</div>
-
   <div class="timing-target-info">
     <div>
       <div style="color:var(--muted);font-size:10px;margin-bottom:2px;">목표 시간</div>
       <div class="target-time" id="targetTimeDisplay">3.00</div>
       <div style="color:var(--muted);font-size:9px;">초</div>
     </div>
-    <div class="target-label">
-      정확히 멈추세요!<br>
-      <span style="color:var(--warn);">±0.08s → 크리티컬</span>
-    </div>
+    <div class="target-label">정확히 멈추세요!<br><span style="color:var(--warn);">±0.20s → 크리티컬</span></div>
   </div>
-
   <div class="precision-hints">
-    <div class="ph ph-crit">🔥 크리티컬 ±0.08s</div>
-    <div class="ph ph-norm">✅ 일반 ±0.20s</div>
+    <div class="ph ph-crit">🔥 크리티컬 ±0.20s</div>
+    <div class="ph ph-norm">✅ 일반 ±0.50s</div>
     <div class="ph ph-miss">💨 미스 그 외</div>
   </div>
-
   <div id="stopwatchDisplay">0.00</div>
-
   <div class="timing-bar-wrap" id="timingBarWrap">
     <div class="timing-zone-norm" id="tzNorm"></div>
     <div class="timing-zone-crit" id="tzCrit"></div>
-    <div class="timing-marker" id="tMarker"></div>
-    <div class="timing-cursor" id="timingCursor"></div>
+    <div class="timing-marker"   id="tMarker"></div>
+    <div class="timing-cursor"   id="timingCursor"></div>
   </div>
-
-  <button class="stop-btn" onclick="stopTiming()">STOP!</button>
+  <button class="stop-btn" id="stopBtn">STOP!</button>
 </div>
 
-<!-- 레벨업 오버레이 -->
 <div id="levelupOverlay">
   <div class="levelup-title">⚡ LEVEL UP!</div>
   <div class="levelup-desc" id="levelupDesc">레벨 2 달성!</div>
 </div>
 
-<!-- 게임오버 오버레이 -->
 <div id="gameoverOverlay">
   <div class="gameover-title" id="gameoverTitle">게임 종료</div>
   <div class="gameover-sub" id="gameoverSub"></div>
@@ -777,722 +384,670 @@
   <button class="retry-btn" onclick="location.reload()">↺ 다시 도전</button>
 </div>
 
-<!-- 토스트 -->
 <div id="soundToast"></div>
 
 <script>
-// ─── 별 배경 생성 ────────────────────────────────────────────────────────────
-(function createStars() {
-  const container = document.getElementById('stars');
+// ── 별 배경 ──────────────────────────────────────────────────────────────────
+(function(){
+  const c = document.getElementById('stars');
   for (let i = 0; i < 80; i++) {
     const s = document.createElement('div');
     s.className = 'star';
-    const size = Math.random() * 2 + 0.5;
-    s.style.cssText = `
-      width:${size}px; height:${size}px;
-      top:${Math.random()*100}%;
-      left:${Math.random()*100}%;
-      animation-duration:${2+Math.random()*4}s;
-      animation-delay:${Math.random()*4}s;
-    `;
-    container.appendChild(s);
+    const sz = Math.random()*2+0.5;
+    s.style.cssText = `width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;animation-duration:${2+Math.random()*4}s;animation-delay:${Math.random()*4}s;`;
+    c.appendChild(s);
   }
 })();
 
-// ─── 게임 상태 ───────────────────────────────────────────────────────────────
-const HARRY_MAX_HP = 100, VOLDY_MAX_HP = 300;
+// ── 상수 ──────────────────────────────────────────────────────────────────────
+const HARRY_MAX_HP = 100, VOLDY_MAX_HP = 150;
 const HARRY_MAX_MP = 100, VOLDY_MAX_MP = 100;
 
-const LEVEL_EXP = [0, 0, 30, 70, 120, 180];
+const LEVEL_EXP   = [0, 0, 30, 70, 120, 180];
 const LEVEL_BONUS = {
-  2: { hp: 20, mp: 20, desc: 'HP+20, MP+20 보너스!' },
-  3: { hp: 15, mp: 15, desc: 'HP+15, MP+15, 공격력 10% 증가!' },
-  4: { hp: 10, mp: 20, desc: 'HP+10, MP+20, 크리티컬 범위 확장!' },
-  5: { hp: 25, mp: 25, desc: 'HP+25, MP+25, 최강 마법사 해금!' },
+  2:{ hp:20, mp:20, desc:'HP+20, MP+20 보너스!' },
+  3:{ hp:15, mp:15, desc:'HP+15, MP+15, 공격력 10% 증가!' },
+  4:{ hp:10, mp:20, desc:'HP+10, MP+20, 크리티컬 범위 확장!' },
+  5:{ hp:25, mp:25, desc:'HP+25, MP+25, 최강 마법사!' },
 };
 
+// ✅ 타이밍 상수 분리
+const CRIT_RANGE      = 0.20;
+const NORM_RANGE      = 0.50;
+const BAR_DURATION    = 8.0;
+const TARGET_CHOICES  = [1.00, 1.50, 2.00, 2.50, 3.00, 3.50, 4.00, 4.50, 5.00];
+
+// ── 게임 상태 ─────────────────────────────────────────────────────────────────
 let state = {
   harryHP: HARRY_MAX_HP, harryMaxHP: HARRY_MAX_HP,
   harryMP: HARRY_MAX_MP, harryMaxMP: HARRY_MAX_MP,
   voldyHP: VOLDY_MAX_HP, voldyMaxHP: VOLDY_MAX_HP,
   voldyMP: VOLDY_MAX_MP, voldyMaxMP: VOLDY_MAX_MP,
-  turn: 1,
-  turnCount: 1,
-  isOver: false,
-  avadaCooldown: 0,
-  lumosCooldown: 0,
-  incendioCooldown: 0,
-  voldyPoison: 0,
-  harryBurn: 0,
-  voldyBurn: 0,
-  harryShield: false,
-  harryStunned: false,
-  voldyStunned: false,
+  turn: 1, turnCount: 1, isOver: false,
+  avadaCooldown: 0, lumosCooldown: 0, incendioCooldown: 0,
+  voldyPoison: 0, voldyBurn: 0,
+  harryShield: false, harryStunned: false, voldyStunned: false,
   harryRegen: 0,
-  harryLevel: 1,
-  harryExp: 0,
-  voldyLevel: 1,
-  voldyExp: 0,
+  harryLevel: 1, harryExp: 0,
+  voldyLevel: 1, voldyExp: 0,
   critCombo: 0,
+  maxCombo: 0,        // ✅ FIX: 최고 콤보 별도 저장
   consecutiveCrit: 0,
-  totalCrits: 0,
-  totalHits: 0,
-  totalMisses: 0,
-  turnsPassed: 0,
+  totalCrits: 0, totalHits: 0, totalMisses: 0,
   harryAtkMult: 1.0,
   critRangeBonus: 0,
 };
 
-// ─── 타이밍 설정 (극악 난이도) ───────────────────────────────────────────────
-const CRIT_RANGE = 0.08;
-const NORM_RANGE = 0.20;
-const TARGET_CHOICES = [1.00, 1.50, 2.00, 2.50, 3.00, 3.50, 4.00, 4.50, 5.00];
-const BAR_DURATION = 8.0;
+// ── ✅ 타이밍 — RAF 기반으로 완전 교체 ──────────────────────────────────────
+let rafId       = null;     // requestAnimationFrame ID
+let startTs     = 0;        // performance.now() 기준점
+let pendingSpell = '';
+let targetTime   = 3.00;
+let isTiming     = false;
 
-let targetTime = 3.00;
-let startTime = 0, timerInterval = null, pendingSpell = "";
+// DOM 캐시 (updateUI 호출 비용 절감)
+const EL = {};
+function cacheEls() {
+  ['timingOverlay','stopwatchDisplay','timingCursor','timingBarWrap',
+   'tzNorm','tzCrit','tMarker','harryHpBar','harryHpNum','harryMpBar',
+   'harryMpLabel','harryExpBar','harryLvBadge','harryBadges',
+   'voldyHpBar','voldyHpNum','voldyMpBar','voldyMpLabel','voldyExpBar',
+   'voldyLvBadge','voldyBadges','turnCount','comboDisplay',
+   'bestComboNum','btnAvada','btnLumos','btnIncendio',
+   'harryPanel','voldyPanel','voldyThinking','logBox','resultFlash'
+  ].forEach(id => EL[id] = document.getElementById(id));
+}
 
-// ─── Web Audio ───────────────────────────────────────────────────────────────
+function startTiming(spell) {
+  if (state.turn !== 1 || state.isOver) return;
+  if (spell === '아바다'   && state.avadaCooldown   > 0) return;
+  if (spell === '루모스'   && state.lumosCooldown   > 0) return;
+  if (spell === '인센디오' && state.incendioCooldown > 0) return;
+
+  const cost = {익스펙토:20,스투페파이:25,프로테고:15,아바다:50,루모스:30,인센디오:35}[spell];
+  if (state.harryMP < cost) {
+    addLog(`💬 MP 부족! (필요:${cost}MP 현재:${state.harryMP}MP)`, '#e74c3c');
+    return;
+  }
+
+  pendingSpell = spell;
+  targetTime   = TARGET_CHOICES[Math.floor(Math.random() * TARGET_CHOICES.length)];
+
+  const critR = CRIT_RANGE + state.critRangeBonus;
+  const normR = NORM_RANGE;
+
+  const names = {익스펙토:'Expelliarmus',스투페파이:'Stupefy',프로테고:'Protego',아바다:'Avada Kedavra',루모스:'Lumos Maxima',인센디오:'Incendio'};
+  document.getElementById('timingSpellName').textContent = '✨ ' + names[spell];
+  document.getElementById('targetTimeDisplay').textContent = targetTime.toFixed(2);
+
+  // 바 존 위치 계산
+  const bw = EL.timingBarWrap.offsetWidth || 340;
+  EL.tMarker.style.left = ((targetTime / BAR_DURATION) * bw - 1) + 'px';
+  EL.tzNorm.style.left  = Math.max(0,(targetTime-normR)/BAR_DURATION*100)+'%';
+  EL.tzNorm.style.width = (normR*2/BAR_DURATION*100)+'%';
+  EL.tzCrit.style.left  = Math.max(0,(targetTime-critR)/BAR_DURATION*100)+'%';
+  EL.tzCrit.style.width = (critR*2/BAR_DURATION*100)+'%';
+
+  // 초기화
+  EL.stopwatchDisplay.textContent = '0.00';
+  EL.stopwatchDisplay.style.color = 'white';
+  EL.timingCursor.style.left      = '0px';
+  EL.timingOverlay.style.display  = 'flex';
+
+  SFX.cast();
+
+  // ✅ performance.now() 기준 — iOS throttle 면역
+  startTs  = performance.now();
+  isTiming = true;
+
+  function tick(now) {
+    if (!isTiming) return;
+
+    const elapsed = (now - startTs) / 1000;
+    const bw2     = EL.timingBarWrap.offsetWidth || 340;
+    const pct     = Math.min(elapsed / BAR_DURATION, 1);
+
+    // ✅ 직접 left 세팅 — CSS transition 없음 → 항상 현재 위치 표시
+    EL.timingCursor.style.left       = (pct * bw2 - 2) + 'px';
+    EL.stopwatchDisplay.textContent  = elapsed.toFixed(2);
+
+    const diff  = Math.abs(targetTime - elapsed);
+    const critR2 = CRIT_RANGE + state.critRangeBonus;
+
+    if (diff <= critR2) {
+      EL.stopwatchDisplay.style.color = '#f1c40f';
+      SFX.tick();
+    } else if (diff <= NORM_RANGE) {
+      EL.stopwatchDisplay.style.color = '#2ecc71';
+    } else {
+      EL.stopwatchDisplay.style.color = 'white';
+    }
+
+    if (elapsed < BAR_DURATION + 0.5) {
+      rafId = requestAnimationFrame(tick);
+    } else {
+      doStop();
+    }
+  }
+
+  rafId = requestAnimationFrame(tick);
+}
+
+function doStop() {
+  if (!isTiming) return;
+  isTiming = false;
+  if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+  EL.timingOverlay.style.display = 'none';
+
+  // ✅ performance.now() 기반 경과 시간 계산
+  const stopped = (performance.now() - startTs) / 1000;
+  const diff    = Math.abs(targetTime - stopped);
+  const critR   = CRIT_RANGE + state.critRangeBonus;
+
+  let hitType;
+  if (diff <= critR)      { hitType='critical'; SFX.critical(); flashScreen('crit'); state.consecutiveCrit++; state.totalCrits++; }
+  else if (diff <= NORM_RANGE) { hitType='normal';   SFX.beep();     flashScreen('hit');  state.consecutiveCrit=0; state.totalHits++; }
+  else                         { hitType='miss';     SFX.miss();     flashScreen('miss'); state.consecutiveCrit=0; state.totalMisses++; }
+
+  // ✅ 콤보 시스템 + 최고 콤보 갱신
+  if (hitType === 'critical') {
+    state.critCombo++;
+    state.maxCombo = Math.max(state.maxCombo, state.critCombo); // ✅ FIX
+    if (state.critCombo >= 2) {
+      SFX.combo();
+      EL.comboDisplay.textContent = `🔥 COMBO x${state.critCombo}`;
+      EL.comboDisplay.classList.add('show');
+    }
+  } else {
+    state.critCombo = 0;
+    EL.comboDisplay.classList.remove('show');
+  }
+
+  const comboMult = (hitType==='critical' && state.critCombo>=2)
+    ? (1 + (state.critCombo-1)*0.1) : 1.0;
+
+  addLog(`⏱ 멈춘: ${stopped.toFixed(2)}s | 목표: ${targetTime.toFixed(2)}s | 오차: ${diff.toFixed(2)}s`, '#8899aa');
+  executeSpell(pendingSpell, hitType, comboMult);
+}
+
+// STOP 버튼 — 터치와 클릭 모두 대응 (모바일 지연 방지)
+document.getElementById('stopBtn').addEventListener('touchstart', function(e){
+  e.preventDefault(); // 300ms 지연 제거
+  doStop();
+}, { passive: false });
+document.getElementById('stopBtn').addEventListener('click', doStop);
+
+function flashScreen(type) {
+  const el = EL.resultFlash;
+  el.className = type;
+  setTimeout(() => el.className='', 500);
+}
+
+// ── Web Audio ─────────────────────────────────────────────────────────────────
 let audioCtx = null;
 function getAudioCtx() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
   return audioCtx;
 }
 function playTone(freq, type, dur, vol=0.25, delay=0) {
   try {
-    const ctx = getAudioCtx();
-    const o = ctx.createOscillator(), g = ctx.createGain();
+    const ctx=getAudioCtx(), o=ctx.createOscillator(), g=ctx.createGain();
     o.connect(g); g.connect(ctx.destination);
-    o.type = type; o.frequency.value = freq;
-    g.gain.setValueAtTime(vol, ctx.currentTime + delay);
-    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + dur);
-    o.start(ctx.currentTime + delay); o.stop(ctx.currentTime + delay + dur);
-  } catch(e) {}
+    o.type=type; o.frequency.value=freq;
+    g.gain.setValueAtTime(vol, ctx.currentTime+delay);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+delay+dur);
+    o.start(ctx.currentTime+delay); o.stop(ctx.currentTime+delay+dur);
+  } catch(e){}
 }
-
 const SFX = {
-  cast:     () => { playTone(660,'square',0.07,0.18); playTone(880,'sine',0.14,0.14,0.05); },
-  critical: () => { [523,659,784,1047,1319].forEach((f,i)=>playTone(f,'sine',0.22,0.18,i*0.04)); },
-  miss:     () => { playTone(200,'sawtooth',0.28,0.18); },
-  hit:      () => { playTone(150,'square',0.1,0.28); playTone(100,'sine',0.2,0.18,0.05); },
-  heal:     () => { [523,659,784].forEach((f,i)=>playTone(f,'sine',0.24,0.14,i*0.07)); },
-  avada:    () => { for(let i=0;i<5;i++) playTone(80+i*20,'sawtooth',0.4,0.14,i*0.03); },
-  stupefy:  () => { playTone(440,'square',0.07,0.22); playTone(220,'sine',0.28,0.18,0.07); },
-  shield:   () => { [392,494,587].forEach((f,i)=>playTone(f,'sine',0.28,0.1,i*0.06)); },
-  voldy:    () => { playTone(120,'sawtooth',0.14,0.28); playTone(80,'square',0.28,0.18,0.1); },
-  tick:     () => playTone(1200,'sine',0.04,0.05),
-  beep:     () => { playTone(880,'sine',0.05,0.1); playTone(1100,'sine',0.07,0.1,0.04); },
-  win:      () => { [523,659,784,1047,1319,1568].forEach((f,i)=>playTone(f,'sine',0.5,0.2,i*0.1)); },
-  lose:     () => { [392,330,262,196,131].forEach((f,i)=>playTone(f,'sawtooth',0.5,0.2,i*0.15)); },
-  levelup:  () => { [523,784,1047,1319].forEach((f,i)=>playTone(f,'sine',0.35,0.2,i*0.08)); playTone(1568,'sine',0.5,0.25,0.35); },
-  burn:     () => { playTone(300,'sawtooth',0.1,0.2); playTone(180,'sawtooth',0.12,0.2,0.08); },
-  poison:   () => { playTone(200,'sawtooth',0.08,0.14); playTone(160,'sawtooth',0.1,0.14,0.08); },
-  combo:    () => { playTone(880,'sine',0.06,0.2); playTone(1320,'sine',0.08,0.2,0.04); },
-  lumos:    () => { [659,784,1047,1319].forEach((f,i)=>playTone(f,'sine',0.3,0.18,i*0.06)); },
-  incendio: () => { for(let i=0;i<4;i++) playTone(200+i*80,'sawtooth',0.3,0.16,i*0.04); },
-  timing_crit: () => playTone(1400,'sine',0.05,0.18),
-  timing_norm: () => playTone(1000,'sine',0.04,0.12),
+  cast:    ()=>{ playTone(660,'square',0.07,0.18); playTone(880,'sine',0.14,0.14,0.05); },
+  critical:()=>{ [523,659,784,1047,1319].forEach((f,i)=>playTone(f,'sine',0.22,0.18,i*0.04)); },
+  miss:    ()=>{ playTone(200,'sawtooth',0.28,0.18); },
+  hit:     ()=>{ playTone(150,'square',0.1,0.28); playTone(100,'sine',0.2,0.18,0.05); },
+  heal:    ()=>{ [523,659,784].forEach((f,i)=>playTone(f,'sine',0.24,0.14,i*0.07)); },
+  avada:   ()=>{ for(let i=0;i<5;i++) playTone(80+i*20,'sawtooth',0.4,0.14,i*0.03); },
+  stupefy: ()=>{ playTone(440,'square',0.07,0.22); playTone(220,'sine',0.28,0.18,0.07); },
+  shield:  ()=>{ [392,494,587].forEach((f,i)=>playTone(f,'sine',0.28,0.1,i*0.06)); },
+  voldy:   ()=>{ playTone(120,'sawtooth',0.14,0.28); playTone(80,'square',0.28,0.18,0.1); },
+  tick:    ()=>playTone(1200,'sine',0.04,0.05),
+  beep:    ()=>{ playTone(880,'sine',0.05,0.1); playTone(1100,'sine',0.07,0.1,0.04); },
+  win:     ()=>{ [523,659,784,1047,1319,1568].forEach((f,i)=>playTone(f,'sine',0.5,0.2,i*0.1)); },
+  lose:    ()=>{ [392,330,262,196,131].forEach((f,i)=>playTone(f,'sawtooth',0.5,0.2,i*0.15)); },
+  levelup: ()=>{ [523,784,1047,1319].forEach((f,i)=>playTone(f,'sine',0.35,0.2,i*0.08)); playTone(1568,'sine',0.5,0.25,0.35); },
+  burn:    ()=>{ playTone(300,'sawtooth',0.1,0.2); playTone(180,'sawtooth',0.12,0.2,0.08); },
+  poison:  ()=>{ playTone(200,'sawtooth',0.08,0.14); playTone(160,'sawtooth',0.1,0.14,0.08); },
+  combo:   ()=>{ playTone(880,'sine',0.06,0.2); playTone(1320,'sine',0.08,0.2,0.04); },
+  lumos:   ()=>{ [659,784,1047,1319].forEach((f,i)=>playTone(f,'sine',0.3,0.18,i*0.06)); },
+  incendio:()=>{ for(let i=0;i<4;i++) playTone(200+i*80,'sawtooth',0.3,0.16,i*0.04); },
 };
 
-// BGM
-const bgmAudio = new Audio('bgm.mp3');
-bgmAudio.loop = true;
-bgmAudio.volume = 0.5;
+// ✅ BGM — bgm.mp3 없을 때 Web Audio 폴백
 let bgPlaying = false;
+const bgmAudio = new Audio();
+bgmAudio.loop = true; bgmAudio.volume = 0.5;
+bgmAudio.addEventListener('error', startWebAudioBGM);
+
+let bgWebNodes=[], bgWebTimer=null, bgWebPlaying=false, bgEnabled=true;
 
 function playBGM() {
   if (bgPlaying) return;
-  bgmAudio.play().then(() => { bgPlaying = true; }).catch(() => {});
+  bgmAudio.src = 'bgm.mp3';
+  bgmAudio.play().then(()=>{ bgPlaying=true; }).catch(()=>{ startWebAudioBGM(); });
+}
+function startWebAudioBGM() {
+  if (bgWebPlaying || !bgEnabled) return;
+  bgWebPlaying=true;
+  const ctx=getAudioCtx();
+  [[55,0.035],[73.4,0.028],[82.4,0.022],[110,0.018]].forEach(([f,v])=>{
+    try{ const o=ctx.createOscillator(),g=ctx.createGain(); o.type='sine'; o.frequency.value=f; g.gain.value=v; o.connect(g); g.connect(ctx.destination); o.start(); bgWebNodes.push(o,g); }catch(e){}
+  });
+  let beat=0; const mel=[440,392,349,392,523,392,349,330];
+  function nx(){
+    if (!bgEnabled) return;
+    try{ const c=getAudioCtx(),o=c.createOscillator(),g=c.createGain(); o.type='sine'; o.frequency.value=mel[beat%mel.length]; g.gain.setValueAtTime(0.06,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+1.1); o.connect(g); g.connect(c.destination); o.start(); o.stop(c.currentTime+1.1); beat++; }catch(e){}
+    bgWebTimer=setTimeout(nx,1380);
+  }
+  bgWebTimer=setTimeout(nx,700);
 }
 function stopBGM() {
-  bgmAudio.pause();
-  bgmAudio.currentTime = 0;
-  bgPlaying = false;
+  bgPlaying=false; bgEnabled=false;
+  bgmAudio.pause(); bgmAudio.currentTime=0;
+  bgWebNodes.forEach(n=>{try{n.stop&&n.stop();}catch(e){}});
+  bgWebNodes=[]; clearTimeout(bgWebTimer);
 }
 
-// ─── 휴식(턴 넘기기) 기능 ───────────────────────────────────────────────────
-function skipTurn() {
-  if (state.turn !== 1 || state.isOver) return;
-  playBGM();
-  pendingSpell = '휴식';
-  executeSpell('휴식', 'normal', 1.0);
-}
-
-// ─── 타이밍 시작 ─────────────────────────────────────────────────────────────
-function startTiming(spell) {
-  if (state.turn !== 1 || state.isOver) return;
-  if (spell === '아바다' && state.avadaCooldown > 0) return;
-  if (spell === '루모스' && state.lumosCooldown > 0) return;
-  if (spell === '인센디오' && state.incendioCooldown > 0) return;
-
-  const cost = {익스펙토:20, 스투페파이:25, 프로테고:15, 아바다:50, 루모스:30, 인센디오:35}[spell];
-  if (state.harryMP < cost) {
-    addLog(`💬 MP 부족! (필요: ${cost}MP, 현재: ${state.harryMP}MP)`, '#e74c3c');
-    return;
-  }
-
-  playBGM();
-
-  pendingSpell = spell;
-  targetTime = TARGET_CHOICES[Math.floor(Math.random() * TARGET_CHOICES.length)];
-  const critR = CRIT_RANGE + state.critRangeBonus;
-  const normR = NORM_RANGE;
-
-  const spellNames = {
-    익스펙토:'Expelliarmus', 스투페파이:'Stupefy', 프로테고:'Protego',
-    아바다:'Avada Kedavra', 루모스:'Lumos Maxima', 인센디오:'Incendio'
-  };
-  document.getElementById('timingSpellName').textContent = '✨ ' + spellNames[spell];
-  document.getElementById('targetTimeDisplay').textContent = targetTime.toFixed(2);
-
-  const barW = document.getElementById('timingBarWrap').offsetWidth;
-  const ratio = targetTime / BAR_DURATION;
-  const markerPx = ratio * barW;
-
-  document.getElementById('tMarker').style.left = (markerPx - 1) + 'px';
-  document.getElementById('tzNorm').style.left = ((targetTime - normR) / BAR_DURATION * 100) + '%';
-  document.getElementById('tzNorm').style.width = (normR * 2 / BAR_DURATION * 100) + '%';
-  document.getElementById('tzCrit').style.left = ((targetTime - critR) / BAR_DURATION * 100) + '%';
-  document.getElementById('tzCrit').style.width = (critR * 2 / BAR_DURATION * 100) + '%';
-
-  document.getElementById('timingOverlay').style.display = 'flex';
-  document.getElementById('stopwatchDisplay').style.color = 'white';
-  document.getElementById('timingCursor').style.left = '0px';
-  document.getElementById('timingCursor').style.opacity = '1';
-
-  SFX.cast();
-  startTime = Date.now();
-
-  timerInterval = setInterval(() => {
-    const elapsed = (Date.now() - startTime) / 1000;
-    
-    // 블라인드 모드
-    const isBlindActive = (pendingSpell === '아바다' && elapsed > targetTime * 0.6);
-
-    if (isBlindActive) {
-      document.getElementById('stopwatchDisplay').textContent = "? . ??";
-      document.getElementById('stopwatchDisplay').style.color = '#8e44ad';
-      document.getElementById('timingCursor').style.opacity = '0';
-    } else {
-      document.getElementById('stopwatchDisplay').textContent = elapsed.toFixed(2);
-      document.getElementById('timingCursor').style.opacity = '1';
-
-      const diff = Math.abs(targetTime - elapsed);
-      const critR2 = CRIT_RANGE + state.critRangeBonus;
-      if (diff <= critR2) {
-        document.getElementById('stopwatchDisplay').style.color = '#f1c40f';
-        SFX.timing_crit();
-      } else if (diff <= NORM_RANGE) {
-        document.getElementById('stopwatchDisplay').style.color = '#2ecc71';
-        SFX.timing_norm();
-      } else {
-        document.getElementById('stopwatchDisplay').style.color = 'white';
-      }
-    }
-
-    const pct = Math.min(elapsed / BAR_DURATION, 1);
-    const bw = document.getElementById('timingBarWrap').offsetWidth;
-    document.getElementById('timingCursor').style.left = (pct * bw - 1.5) + 'px';
-
-    if (elapsed >= BAR_DURATION + 0.5) stopTiming();
-  }, 16);
-}
-
-function stopTiming() {
-  clearInterval(timerInterval);
-  document.getElementById('timingOverlay').style.display = 'none';
-  document.getElementById('timingCursor').style.opacity = '1';
-
-  const stopped = (Date.now() - startTime) / 1000;
-  const diff = Math.abs(targetTime - stopped);
-  const critR = CRIT_RANGE + state.critRangeBonus;
-
-  let hitType;
-  if (diff <= critR)           { hitType = 'critical'; SFX.critical(); flashScreen('crit'); state.consecutiveCrit++; state.totalCrits++; }
-  else if (diff <= NORM_RANGE) { hitType = 'normal'; SFX.beep(); flashScreen('hit'); state.consecutiveCrit = 0; state.totalHits++; }
-  else                         { hitType = 'miss'; SFX.miss(); flashScreen('miss'); state.consecutiveCrit = 0; state.totalMisses++; }
-
-  if (hitType === 'critical') {
-    state.critCombo++;
-    if (state.critCombo >= 2) {
-      SFX.combo();
-      document.getElementById('comboDisplay').textContent = `🔥 COMBO x${state.critCombo}`;
-      document.getElementById('comboDisplay').classList.add('show');
-    }
-  } else {
-    state.critCombo = 0;
-    document.getElementById('comboDisplay').classList.remove('show');
-  }
-
-  const comboMult = hitType === 'critical' && state.critCombo >= 2 ? (1 + (state.critCombo - 1) * 0.1) : 1.0;
-  addLog(`⏱ 멈춘 시간: ${stopped.toFixed(2)}s | 목표: ${targetTime.toFixed(2)}s | 오차: ${diff.toFixed(2)}s`, '#8899aa');
-  executeSpell(pendingSpell, hitType, comboMult);
-}
-
-function flashScreen(type) {
-  const el = document.getElementById('resultFlash');
-  el.className = type;
-  setTimeout(() => el.className = '', 500);
-}
-
-// ─── 주문 실행 ───────────────────────────────────────────────────────────────
-function executeSpell(spell, hitType, comboMult = 1.0) {
-  const isCrit = hitType === 'critical';
-  const isMiss = hitType === 'miss';
-  const mult   = isCrit ? 1.5 * comboMult : isMiss ? 0 : 1.0 * comboMult;
+// ── 주문 실행 ─────────────────────────────────────────────────────────────────
+function executeSpell(spell, hitType, comboMult=1.0) {
+  const isCrit = hitType==='critical', isMiss = hitType==='miss';
+  const mult   = isCrit ? 1.5*comboMult : isMiss ? 0 : 1.0*comboMult;
   const atkMult = state.harryAtkMult;
-  const prefix = isCrit ? `🔥[크리티컬${comboMult > 1 ? ' x'+comboMult.toFixed(1) : ''}!] ` : isMiss ? '💨[미스] ' : '';
+  const prefix = isCrit ? `🔥[크리티컬${comboMult>1?' x'+comboMult.toFixed(1):''}!] ` : isMiss ? '💨[미스] ' : '';
   const logClr = isCrit ? '#f1c40f' : isMiss ? '#8899aa' : '#4a9eff';
-  
-  const cost = {익스펙토:20, 스투페파이:25, 프로테고:15, 아바다:50, 루모스:30, 인센디오:35, 휴식:0}[spell];
-  state.harryMP = Math.max(0, state.harryMP - cost);
+  const cost   = {익스펙토:20,스투페파이:25,프로테고:15,아바다:50,루모스:30,인센디오:35}[spell];
 
+  state.harryMP = Math.max(0, state.harryMP-cost);
+
+  // 독 처리
   if (state.voldyPoison > 0) {
-    const pd = state.harryShield ? 0 : 5;
-    if (!state.harryShield) { state.harryHP -= pd; addLog(`☠️ 크루시오 독 -${pd}HP (${state.voldyPoison-1}턴 남음)`, '#b44aff'); SFX.poison(); animHit('harry'); }
-    else { addLog(`🛡️ 방어막이 독을 흡수!`, '#4a9eff'); }
+    if (!state.harryShield) {
+      state.harryHP -= 5;
+      addLog(`☠️ 크루시오 독 -5HP (${state.voldyPoison-1}턴 남음)`, '#b44aff');
+      SFX.poison(); animHit('harry');
+    } else {
+      addLog(`🛡️ 방어막이 독을 흡수!`, '#4a9eff');
+    }
     state.voldyPoison--;
   }
-  if (state.voldyBurn > 0 && !isMiss) {
-    const bd = 8;
-    state.voldyHP -= bd;
-    addLog(`🔥 화상 효과 볼드모트 -${bd}HP (${state.voldyBurn-1}턴 남음)`, '#ff6b35');
-    SFX.burn(); animHit('voldy');
+
+  // ✅ FIX: 화상은 미스여도 턴마다 처리 (화상 카운트 감소), 데미지는 미스 아닐 때
+  if (state.voldyBurn > 0) {
+    if (!isMiss) {
+      const bd = 8;
+      state.voldyHP -= bd;
+      addLog(`🔥 화상 볼드모트 -${bd}HP (${state.voldyBurn-1}턴 남음)`, '#ff6b35');
+      SFX.burn(); animHit('voldy');
+    }
     state.voldyBurn--;
   }
+
+  // 재생
   if (state.harryRegen > 0) {
-    const rg = 8;
-    state.harryHP = Math.min(state.harryMaxHP, state.harryHP + rg);
-    addLog(`💚 재생 +${rg}HP (${state.harryRegen-1}턴 남음)`, '#2ecc71');
+    state.harryHP = Math.min(state.harryMaxHP, state.harryHP+8);
+    addLog(`💚 재생 +8HP (${state.harryRegen-1}턴 남음)`, '#2ecc71');
     state.harryRegen--;
   }
 
   state.harryShield = false;
-  
-  if (spell !== '휴식') {
-    animAttack('harry');
-  }
+  animAttack('harry');
 
-  if (spell === '휴식') {
-    addLog(`💤 해리: 턴을 쉬며 기력을 가다듬습니다. (MP +30 추가 회복)`, '#2ecc71');
-    state.harryMP = Math.min(state.harryMaxMP, state.harryMP + 30);
-    SFX.heal();
-    state.turn = 2;
-  } else if (spell === '익스펙토') {
-    const dmg = Math.round(25 * mult * atkMult);
+  if (spell==='익스펙토') {
+    const dmg = Math.round(25*mult*atkMult);
     addLog(`⚡ 해리: Expelliarmus! ${prefix}→ 볼드모트 -${dmg}HP`, logClr);
-    if (mult > 0) { state.voldyHP -= dmg; animHit('voldy'); showDmgPopup('voldy', dmg, hitType); SFX.hit(); gainExp('harry', 10 + (isCrit?10:0)); }
-    state.turn = 2;
-  } else if (spell === '스투페파이') {
-    const dmg = Math.round(18 * mult * atkMult);
+    if (mult>0) { state.voldyHP-=dmg; animHit('voldy'); showDmgPopup('voldy',dmg,hitType); SFX.hit(); gainExp('harry',10+(isCrit?10:0)); }
+    state.turn=2;
+  } else if (spell==='스투페파이') {
+    const dmg = Math.round(18*mult*atkMult);
     addLog(`🌀 해리: Stupefy! ${prefix}→ 볼드모트 -${dmg}HP${mult>0?', 턴 스킵!':''}`, logClr);
-    if (mult > 0) { state.voldyHP -= dmg; animHit('voldy'); showDmgPopup('voldy', dmg, hitType); SFX.stupefy(); state.voldyStunned = true; gainExp('harry', 12 + (isCrit?12:0)); state.turn = 1; }
-    else state.turn = 2;
-  } else if (spell === '프로테고') {
-    const heal = Math.round(20 * mult);
-    addLog(`🛡️ 해리: Protego! ${prefix}→ HP +${heal}, 방어막 + 재생 1턴`, isMiss ? '#8899aa' : '#2ecc71');
-    if (mult > 0) {
-      state.harryHP = Math.min(state.harryMaxHP, state.harryHP + heal);
-      state.harryShield = true;
-      if (isCrit) { state.harryRegen = 2; addLog(`✨ [크리티컬] 재생 효과 2턴 추가!`, '#f1c40f'); }
-      SFX.heal(); SFX.shield(); showHealPopup('harry', heal);
-      gainExp('harry', 8 + (isCrit?8:0));
+    if (mult>0) { state.voldyHP-=dmg; animHit('voldy'); showDmgPopup('voldy',dmg,hitType); SFX.stupefy(); state.voldyStunned=true; gainExp('harry',12+(isCrit?12:0)); state.turn=1; }
+    else state.turn=2;
+  } else if (spell==='프로테고') {
+    const heal = Math.round(20*mult);
+    addLog(`🛡️ 해리: Protego! ${prefix}→ HP+${heal}, 방어막${isCrit?' + 재생 2턴':''}`, isMiss?'#8899aa':'#2ecc71');
+    if (mult>0) {
+      state.harryHP=Math.min(state.harryMaxHP, state.harryHP+heal);
+      state.harryShield=true;
+      if (isCrit) state.harryRegen=2;
+      SFX.heal(); SFX.shield(); showHealPopup('harry',heal);
+      gainExp('harry',8+(isCrit?8:0));
     }
-    state.turn = 2;
-  } else if (spell === '아바다') {
-    // 💡 아바다 케다브라 전용 데미지 로직 (100~150 베이스 + 크리티컬 막대한 보너스)
-    let baseDmg = Math.floor(Math.random() * 51) + 100; // 100~150
-    let avadaMult = mult;
-    
-    // 크리티컬 시 1.5배 ~ 2.5배의 강력한 추가 배율!
-    if (isCrit) {
-      avadaMult = (1.5 + Math.random() * 1.0) * comboMult;
-    }
-    
-    let dmg = Math.round(baseDmg * avadaMult * atkMult);
-    if (isMiss) dmg = 0;
-
-    addLog(`☠️ 해리: Avada Kedavra!!! ${prefix}→ 볼드모트 -${dmg}HP`, isMiss ? '#8899aa' : '#9b59b6');
-    if (dmg > 0) { state.voldyHP -= dmg; animHit('voldy'); showDmgPopup('voldy', dmg, hitType); SFX.avada(); gainExp('harry', 30); }
-    state.avadaCooldown = 3; state.turn = 2;
-  } else if (spell === '루모스') {
-    const mpRestore = Math.round(60 * (isCrit ? 1.5 : isMiss ? 0.3 : 1.0));
-    addLog(`💡 해리: Lumos Maxima! ${prefix}→ MP +${mpRestore} 회복`, isMiss ? '#8899aa' : '#fff176');
-    state.harryMP = Math.min(state.harryMaxMP, state.harryMP + mpRestore);
-    if (isCrit) { state.harryHP = Math.min(state.harryMaxHP, state.harryHP + 15); addLog(`✨ [크리티컬] HP +15 보너스!`, '#f1c40f'); showHealPopup('harry', 15); }
-    SFX.lumos(); gainExp('harry', 10);
-    state.lumosCooldown = 4; state.turn = 2;
-  } else if (spell === '인센디오') {
-    const dmg = Math.round(30 * mult * atkMult);
-    addLog(`🔥 해리: Incendio! ${prefix}→ 볼드모트 -${dmg}HP${mult>0?', 화상 2턴!':''}`, isMiss ? '#8899aa' : '#ff6b35');
-    if (mult > 0) {
-      state.voldyHP -= dmg; animHit('voldy'); showDmgPopup('voldy', dmg, hitType); SFX.incendio();
-      state.voldyBurn = isCrit ? 3 : 2;
-      gainExp('harry', 15 + (isCrit?15:0));
-    }
-    state.incendioCooldown = 3; state.turn = 2;
+    state.turn=2;
+  } else if (spell==='아바다') {
+    const dmg = Math.round(50*mult*atkMult);
+    addLog(`☠️ 해리: Avada Kedavra!!! ${prefix}→ 볼드모트 -${dmg}HP`, isMiss?'#8899aa':'#9b59b6');
+    if (mult>0) { state.voldyHP-=dmg; animHit('voldy'); showDmgPopup('voldy',dmg,hitType); SFX.avada(); gainExp('harry',20+(isCrit?20:0)); }
+    state.avadaCooldown=3; state.turn=2;
+  } else if (spell==='루모스') {
+    const mpR = Math.round(60*(isCrit?1.5:isMiss?0.3:1.0));
+    addLog(`💡 해리: Lumos Maxima! ${prefix}→ MP+${mpR} 회복`, isMiss?'#8899aa':'#fff176');
+    state.harryMP=Math.min(state.harryMaxMP, state.harryMP+mpR);
+    if (isCrit) { state.harryHP=Math.min(state.harryMaxHP,state.harryHP+15); addLog(`✨ [크리티컬] HP+15!`,'#f1c40f'); showHealPopup('harry',15); }
+    SFX.lumos(); gainExp('harry',10);
+    state.lumosCooldown=4; state.turn=2;
+  } else if (spell==='인센디오') {
+    const dmg = Math.round(30*mult*atkMult);
+    addLog(`🔥 해리: Incendio! ${prefix}→ 볼드모트 -${dmg}HP${mult>0?', 화상!':''}`, isMiss?'#8899aa':'#ff6b35');
+    if (mult>0) { state.voldyHP-=dmg; animHit('voldy'); showDmgPopup('voldy',dmg,hitType); SFX.incendio(); state.voldyBurn=(isCrit?3:2); gainExp('harry',15+(isCrit?15:0)); }
+    state.incendioCooldown=3; state.turn=2;
   }
 
-  if (state.avadaCooldown > 0 && spell !== '아바다') state.avadaCooldown--;
-  if (state.lumosCooldown > 0 && spell !== '루모스') state.lumosCooldown--;
-  if (state.incendioCooldown > 0 && spell !== '인센디오') state.incendioCooldown--;
+  if (state.avadaCooldown>0  && spell!=='아바다')   state.avadaCooldown--;
+  if (state.lumosCooldown>0  && spell!=='루모스')   state.lumosCooldown--;
+  if (state.incendioCooldown>0 && spell!=='인센디오') state.incendioCooldown--;
 
-  state.harryMP = Math.min(state.harryMaxMP, state.harryMP + 20);
+  // ✅ 밸런스: MP 자연회복 5 → 8
+  state.harryMP = Math.min(state.harryMaxMP, state.harryMP+8);
 
   state.turnCount++;
-  state.turnsPassed++;
-  clampHP();
-  updateUI();
+  clampHP(); updateUI();
   if (checkGameOver()) return;
 
-  if (state.turn === 2) {
-    setButtonsEnabled(false);
-    document.getElementById('voldyThinking').classList.add('visible');
-    document.getElementById('voldyPanel').classList.add('active-turn');
-    document.getElementById('harryPanel').classList.remove('active-turn');
+  if (state.turn===2) {
+    // ✅ setButtonsEnabled(false) 먼저 → updateUI 전에 비활성화
+    document.querySelectorAll('.spell-btn').forEach(b=>b.disabled=true);
+    EL.voldyThinking.classList.add('visible');
+    EL.voldyPanel.classList.add('active-turn');
+    EL.harryPanel.classList.remove('active-turn');
     setTimeout(voldemortTurn, 1800);
   } else {
-    addLog('─────────────────────────────', '#2a2a5a');
-    addLog('👓 해리의 턴 — 주문을 선택하세요.', '#4a9eff');
-    document.getElementById('harryPanel').classList.add('active-turn');
-    document.getElementById('voldyPanel').classList.remove('active-turn');
+    addLog('─────────────────────────────','#2a2a5a');
+    addLog('👓 해리의 턴 — 주문을 선택하세요.','#4a9eff');
+    EL.harryPanel.classList.add('active-turn');
+    EL.voldyPanel.classList.remove('active-turn');
   }
 }
 
-// ─── 경험치 / 레벨업 ─────────────────────────────────────────────────────────
+// ── 경험치 / 레벨업 ───────────────────────────────────────────────────────────
 function gainExp(who, amount) {
-  if (who !== 'harry') return;
-  if (state.harryLevel >= 5) return;
-
-  state.harryExp += amount;
-  const needed = LEVEL_EXP[state.harryLevel + 1] || 999;
-  if (state.harryExp >= needed) {
-    state.harryExp -= needed;
-    state.harryLevel++;
-    const bonus = LEVEL_BONUS[state.harryLevel];
-    if (bonus) {
-      state.harryMaxHP += bonus.hp;
-      state.harryHP = Math.min(state.harryMaxHP, state.harryHP + bonus.hp);
-      state.harryMaxMP += bonus.mp;
-      state.harryMP = Math.min(state.harryMaxMP, state.harryMP + bonus.mp);
-      if (state.harryLevel >= 3) state.harryAtkMult = 1.10;
-      if (state.harryLevel >= 4) state.critRangeBonus = 0.05;
-      showLevelup(`Lv.${state.harryLevel} 달성! ${bonus.desc}`);
+  if (who==='harry') {
+    if (state.harryLevel>=5) return;
+    state.harryExp+=amount;
+    const needed=LEVEL_EXP[state.harryLevel+1]||999;
+    if (state.harryExp>=needed) {
+      state.harryExp-=needed; state.harryLevel++;
+      const b=LEVEL_BONUS[state.harryLevel];
+      if (b) {
+        state.harryMaxHP+=b.hp; state.harryHP=Math.min(state.harryMaxHP,state.harryHP+b.hp);
+        state.harryMaxMP+=b.mp; state.harryMP=Math.min(state.harryMaxMP,state.harryMP+b.mp);
+        if (state.harryLevel>=3) state.harryAtkMult=1.10;
+        if (state.harryLevel>=4) state.critRangeBonus=0.05;
+        showLevelup(`Lv.${state.harryLevel} 달성! ${b.desc}`);
+      }
+      SFX.levelup(); updateUI();
     }
-    SFX.levelup();
+  }
+}
+
+function gainVoldyExp(amt) {
+  if (state.voldyLevel>=5) return;
+  state.voldyExp+=amt;
+  const needed=LEVEL_EXP[state.voldyLevel+1]||999;
+  if (state.voldyExp>=needed) {
+    state.voldyExp-=needed; state.voldyLevel++;
+    const b={2:{hp:25,mp:15},3:{hp:20,mp:20},4:{hp:30,mp:20},5:{hp:25,mp:25}}[state.voldyLevel];
+    if (b) {
+      state.voldyMaxHP+=b.hp; state.voldyHP=Math.min(state.voldyMaxHP,state.voldyHP+b.hp);
+      state.voldyMaxMP+=b.mp; state.voldyMP=Math.min(state.voldyMaxMP,state.voldyMP+b.mp);
+    }
+    addLog(`🐍 볼드모트가 Lv.${state.voldyLevel}로 강해졌다!`,'#b44aff');
     updateUI();
   }
 }
 
 function showLevelup(desc) {
-  const ov = document.getElementById('levelupOverlay');
-  document.getElementById('levelupDesc').textContent = desc;
-  ov.style.display = 'block';
-  setTimeout(() => { ov.style.display = 'none'; }, 2500);
+  const ov=document.getElementById('levelupOverlay');
+  document.getElementById('levelupDesc').textContent=desc;
+  ov.style.display='block';
+  setTimeout(()=>ov.style.display='none', 2500);
 }
 
-// ─── 볼드모트 AI ─────────────────────────────────────────────────────────────
+// ── 볼드모트 AI ───────────────────────────────────────────────────────────────
 function voldemortTurn() {
   if (state.isOver) return;
-  document.getElementById('voldyThinking').classList.remove('visible');
+  EL.voldyThinking.classList.remove('visible');
 
   if (state.voldyStunned) {
-    addLog('🌀 볼드모트가 Stupefy에 의해 행동 불능!', '#f1c40f');
-    state.voldyStunned = false;
-    gainVoldyExp(15);
+    addLog('🌀 볼드모트가 Stupefy에 의해 행동 불능!','#f1c40f');
+    state.voldyStunned=false;
+    // ✅ FIX: stunned 턴에 EXP 제거
     endVoldyTurn(); return;
   }
 
-  state.voldyMP = Math.min(state.voldyMaxMP, state.voldyMP + 8);
-  gainVoldyExp(8);
+  state.voldyMP=Math.min(state.voldyMaxMP, state.voldyMP+8);
+  gainVoldyExp(8); // 정상 행동 턴에만 EXP
+  animAttack('voldy'); SFX.voldy();
 
-  animAttack('voldy');
-  SFX.voldy();
+  // ✅ 밸런스: Avada 기본 데미지 하향 (32→28, Lv배율 *3→*2)
+  const hpR=state.voldyHP/state.voldyMaxHP;
+  const roll=Math.random();
+  if (hpR<0.25)      { if(roll<0.65)voldyAvada(); else if(roll<0.85)voldyCrucio(); else voldyImperio(); }
+  else if (hpR<0.55) { if(roll<0.30)voldyAvada(); else if(roll<0.65)voldyCrucio(); else voldyImperio(); }
+  else               { if(roll<0.15)voldyAvada(); else if(roll<0.65)voldyCrucio(); else voldyImperio(); }
 
-  const hpR = state.voldyHP / state.voldyMaxHP;
-  const roll = Math.random();
-
-  if (hpR < 0.25) {
-    if (roll < 0.65) voldyAvada();
-    else if (roll < 0.85) voldyCrucio();
-    else voldyImperio();
-  } else if (hpR < 0.55) {
-    if (roll < 0.30) voldyAvada();
-    else if (roll < 0.65) voldyCrucio();
-    else voldyImperio();
-  } else {
-    if (roll < 0.15) voldyAvada();
-    else if (roll < 0.65) voldyCrucio();
-    else voldyImperio();
-  }
-
-  state.voldyMP = Math.max(0, state.voldyMP - 20);
-  clampHP();
-  updateUI();
+  state.voldyMP=Math.max(0,state.voldyMP-20);
+  clampHP(); updateUI();
   if (checkGameOver()) return;
   endVoldyTurn();
 }
 
-function gainVoldyExp(amt) {
-  if (state.voldyLevel >= 5) return;
-  state.voldyExp += amt;
-  const needed = LEVEL_EXP[state.voldyLevel + 1] || 999;
-  if (state.voldyExp >= needed) {
-    state.voldyExp -= needed;
-    state.voldyLevel++;
-    const bonus = {2:{hp:10,mp:15},3:{hp:10,mp:20},4:{hp:15,mp:20},5:{hp:10,mp:25}}[state.voldyLevel];
-    if (bonus) {
-      state.voldyMaxHP += bonus.hp;
-      state.voldyHP = Math.min(state.voldyMaxHP, state.voldyHP + bonus.hp);
-      state.voldyMaxMP += bonus.mp;
-      state.voldyMP = Math.min(state.voldyMaxMP, state.voldyMP + bonus.mp);
-    }
-    addLog(`🐍 볼드모트가 Lv.${state.voldyLevel}로 성장했다! 더 강해졌다!`, '#b44aff');
-    updateUI();
-  }
-}
-
 function voldyAvada() {
-  const baseDmg = 20 + state.voldyLevel * 2;
-  const dmg = state.harryShield ? Math.round(baseDmg * 0.25) : baseDmg;
-  const shield = state.harryShield ? ' (방어막 경감!)' : '';
-  addLog(`🐍 볼드모트: Avada Kedavra! → 해리 -${dmg}HP${shield}`, '#e74c3c');
-  state.harryHP -= dmg; state.harryShield = false;
-  animHit('harry'); showDmgPopup('harry', dmg, 'normal'); SFX.hit();
+  // ✅ FIX 밸런스: 28 + Lv*2 (기존 32 + Lv*3)
+  const base = 28 + state.voldyLevel*2;
+  const dmg  = state.harryShield ? Math.round(base*0.25) : base;
+  addLog(`🐍 볼드모트: Avada Kedavra! → 해리 -${dmg}HP${state.harryShield?' (방어막 경감!)':''}`, '#e74c3c');
+  state.harryHP-=dmg; state.harryShield=false;
+  animHit('harry'); showDmgPopup('harry',dmg,'normal'); SFX.hit();
 }
 function voldyCrucio() {
-  if (state.voldyPoison > 0) {
-    const dmg = state.harryShield ? 2 : 12 + state.voldyLevel;
-    addLog(`🐍 볼드모트: Sectumsempra! → 해리 -${dmg}HP`, '#e74c3c');
-    state.harryHP -= dmg; state.harryShield = false;
-    animHit('harry'); showDmgPopup('harry', dmg, 'normal'); SFX.hit();
+  if (state.voldyPoison>0) {
+    const dmg = state.harryShield ? 4 : 18+state.voldyLevel*2;
+    addLog(`🐍 볼드모트: Sectumsempra! → 해리 -${dmg}HP`,'#e74c3c');
+    state.harryHP-=dmg; state.harryShield=false;
+    animHit('harry'); showDmgPopup('harry',dmg,'normal'); SFX.hit();
   } else {
-    const dmg = state.harryShield ? 1 : 5 + state.voldyLevel;
-    addLog(`🐍 볼드모트: Crucio! → 해리 -${dmg}HP, 3턴간 독(-5HP/턴)`, '#e74c3c');
-    state.harryHP -= dmg; state.voldyPoison = 3; state.harryShield = false;
-    animHit('harry'); showDmgPopup('harry', dmg, 'normal'); SFX.poison();
+    const dmg = state.harryShield ? 2 : 7+state.voldyLevel;
+    addLog(`🐍 볼드모트: Crucio! → 해리 -${dmg}HP, 3턴 독(-5HP/턴)`,'#e74c3c');
+    state.harryHP-=dmg; state.voldyPoison=3; state.harryShield=false;
+    animHit('harry'); showDmgPopup('harry',dmg,'normal'); SFX.poison();
   }
 }
 function voldyImperio() {
-  const dmg = state.harryShield ? 0 : 3 + state.voldyLevel;
-  addLog(`🐍 볼드모트: Imperio! → 해리 -${dmg}HP, 다음 턴 행동 불능!`, '#e74c3c');
-  state.harryHP -= dmg; state.harryStunned = true; state.harryShield = false;
-  animHit('harry'); showDmgPopup('harry', dmg, 'normal'); SFX.stupefy();
+  const dmg = state.harryShield ? 2 : 4+state.voldyLevel;
+  addLog(`🐍 볼드모트: Imperio! → 해리 -${dmg}HP, 다음 턴 행동 불능!`,'#e74c3c');
+  state.harryHP-=dmg; state.harryStunned=true; state.harryShield=false;
+  animHit('harry'); showDmgPopup('harry',dmg,'normal'); SFX.stupefy();
 }
 
 function endVoldyTurn() {
   updateUI();
   if (checkGameOver()) return;
-  setTimeout(() => {
-    state.turn = 1;
-    addLog('─────────────────────────────', '#2a2a5a');
+  setTimeout(()=>{
+    state.turn=1;
+    addLog('─────────────────────────────','#2a2a5a');
     if (state.harryStunned) {
-      addLog('⚡ 해리가 Imperio에 걸려 이번 턴 행동 불능!', '#f1c40f');
-      state.harryStunned = false; state.turnCount++;
-      state.harryMP = Math.min(state.harryMaxMP, state.harryMP + 20);
+      addLog('⚡ 해리가 Imperio에 걸려 이번 턴 행동 불능!','#f1c40f');
+      state.harryStunned=false; state.turnCount++;
+      state.harryMP=Math.min(state.harryMaxMP, state.harryMP+8);
       updateUI();
-      setTimeout(() => {
-        document.getElementById('voldyThinking').classList.add('visible');
-        document.getElementById('voldyPanel').classList.add('active-turn');
-        document.getElementById('harryPanel').classList.remove('active-turn');
-        setTimeout(voldemortTurn, 1800);
-      }, 1000);
+      setTimeout(()=>{
+        EL.voldyThinking.classList.add('visible');
+        EL.voldyPanel.classList.add('active-turn');
+        EL.harryPanel.classList.remove('active-turn');
+        setTimeout(voldemortTurn,1800);
+      },1000);
     } else {
-      addLog('👓 해리의 턴 — 주문을 선택하세요.', '#4a9eff');
-      document.getElementById('harryPanel').classList.add('active-turn');
-      document.getElementById('voldyPanel').classList.remove('active-turn');
+      addLog('👓 해리의 턴 — 주문을 선택하세요.','#4a9eff');
+      EL.harryPanel.classList.add('active-turn');
+      EL.voldyPanel.classList.remove('active-turn');
       setButtonsEnabled(true);
     }
   }, 1200);
 }
 
-// ─── UI ──────────────────────────────────────────────────────────────────────
+// ── UI ────────────────────────────────────────────────────────────────────────
 function updateUI() {
-  const hPct = Math.max(0, state.harryHP / state.harryMaxHP * 100);
-  const vPct = Math.max(0, state.voldyHP / state.voldyMaxHP * 100);
-  document.getElementById('harryHpBar').style.width = hPct + '%';
-  document.getElementById('harryHpBar').style.backgroundColor = hpColor(hPct);
-  document.getElementById('harryHpNum').textContent = `${Math.max(0,Math.round(state.harryHP))} / ${state.harryMaxHP}`;
-  document.getElementById('voldyHpBar').style.width = vPct + '%';
-  document.getElementById('voldyHpBar').style.backgroundColor = hpColor(vPct);
-  document.getElementById('voldyHpNum').textContent = `${Math.max(0,Math.round(state.voldyHP))} / ${state.voldyMaxHP}`;
+  const hPct=Math.max(0,state.harryHP/state.harryMaxHP*100);
+  const vPct=Math.max(0,state.voldyHP/state.voldyMaxHP*100);
 
-  document.getElementById('harryMpBar').style.width = (state.harryMP / state.harryMaxMP * 100) + '%';
-  document.getElementById('harryMpLabel').textContent = `MP: ${state.harryMP} / ${state.harryMaxMP}`;
-  document.getElementById('voldyMpBar').style.width = (state.voldyMP / state.voldyMaxMP * 100) + '%';
-  document.getElementById('voldyMpLabel').textContent = `MP: ${state.voldyMP} / ${state.voldyMaxMP}`;
+  EL.harryHpBar.style.width=hPct+'%'; EL.harryHpBar.style.backgroundColor=hpColor(hPct);
+  EL.harryHpNum.textContent=`${Math.max(0,Math.round(state.harryHP))} / ${state.harryMaxHP}`;
+  EL.voldyHpBar.style.width=vPct+'%'; EL.voldyHpBar.style.backgroundColor=hpColor(vPct);
+  EL.voldyHpNum.textContent=`${Math.max(0,Math.round(state.voldyHP))} / ${state.voldyMaxHP}`;
 
-  if (state.harryLevel < 5) {
-    const needed = LEVEL_EXP[state.harryLevel + 1] || 1;
-    document.getElementById('harryExpBar').style.width = (state.harryExp / needed * 100) + '%';
-  } else document.getElementById('harryExpBar').style.width = '100%';
-  if (state.voldyLevel < 5) {
-    const vn = LEVEL_EXP[state.voldyLevel + 1] || 1;
-    document.getElementById('voldyExpBar').style.width = (state.voldyExp / vn * 100) + '%';
-  } else document.getElementById('voldyExpBar').style.width = '100%';
+  EL.harryMpBar.style.width=(state.harryMP/state.harryMaxMP*100)+'%';
+  EL.harryMpLabel.textContent=`MP: ${state.harryMP} / ${state.harryMaxMP}`;
+  EL.voldyMpBar.style.width=(state.voldyMP/state.voldyMaxMP*100)+'%';
+  EL.voldyMpLabel.textContent=`MP: ${state.voldyMP} / ${state.voldyMaxMP}`;
 
-  document.getElementById('harryLvBadge').textContent = `Lv.${state.harryLevel}`;
-  document.getElementById('voldyLvBadge').textContent = `Lv.${state.voldyLevel}`;
-  document.getElementById('turnCount').textContent = `턴 ${state.turnCount}`;
-  document.getElementById('streakNum').textContent = state.consecutiveCrit;
+  const hExpN=LEVEL_EXP[state.harryLevel+1]||1;
+  EL.harryExpBar.style.width=(state.harryLevel>=5?100:state.harryExp/hExpN*100)+'%';
+  const vExpN=LEVEL_EXP[state.voldyLevel+1]||1;
+  EL.voldyExpBar.style.width=(state.voldyLevel>=5?100:state.voldyExp/vExpN*100)+'%';
 
-  const hb = document.getElementById('harryBadges');
-  hb.innerHTML = '';
-  if (state.voldyPoison > 0) hb.innerHTML += `<span class="badge badge-poison">☠️독 ${state.voldyPoison}턴</span>`;
-  if (state.harryShield) hb.innerHTML += `<span class="badge badge-shield">🛡방어막</span>`;
-  if (state.harryStunned) hb.innerHTML += `<span class="badge badge-stun">⚡행동불가</span>`;
-  if (state.harryRegen > 0) hb.innerHTML += `<span class="badge badge-regen">💚재생 ${state.harryRegen}턴</span>`;
+  EL.harryLvBadge.textContent=`Lv.${state.harryLevel}`;
+  EL.voldyLvBadge.textContent=`Lv.${state.voldyLevel}`;
+  EL.turnCount.textContent=`턴 ${state.turnCount}`;
 
-  const vb = document.getElementById('voldyBadges');
-  vb.innerHTML = '';
-  if (state.voldyBurn > 0) vb.innerHTML += `<span class="badge badge-burn">🔥화상 ${state.voldyBurn}턴</span>`;
-  if (state.voldyStunned) vb.innerHTML += `<span class="badge badge-stun">⚡행동불가</span>`;
+  // ✅ FIX: 최고 콤보 표시
+  EL.bestComboNum.textContent=state.maxCombo;
 
-  const btnA = document.getElementById('btnAvada');
-  if (state.avadaCooldown > 0) {
-    btnA.disabled = true;
-    btnA.querySelector('.spell-desc').innerHTML = `쿨타임<br>⏳${state.avadaCooldown}턴`;
-  } else {
-    btnA.disabled = false;
-    btnA.querySelector('.spell-desc').innerHTML = `피해 100~150<br>쿨타임 3턴`;
+  // 상태 뱃지
+  EL.harryBadges.innerHTML='';
+  if (state.voldyPoison>0)  EL.harryBadges.innerHTML+=`<span class="badge badge-poison">☠️독 ${state.voldyPoison}턴</span>`;
+  if (state.harryShield)    EL.harryBadges.innerHTML+=`<span class="badge badge-shield">🛡방어막</span>`;
+  if (state.harryStunned)   EL.harryBadges.innerHTML+=`<span class="badge badge-stun">⚡행동불가</span>`;
+  if (state.harryRegen>0)   EL.harryBadges.innerHTML+=`<span class="badge badge-regen">💚재생 ${state.harryRegen}턴</span>`;
+
+  EL.voldyBadges.innerHTML='';
+  if (state.voldyBurn>0)    EL.voldyBadges.innerHTML+=`<span class="badge badge-burn">🔥화상 ${state.voldyBurn}턴</span>`;
+  if (state.voldyStunned)   EL.voldyBadges.innerHTML+=`<span class="badge badge-stun">⚡행동불가</span>`;
+
+  // 쿨다운 버튼
+  function setCd(btn, cd, defaultDesc) {
+    if (cd>0) { btn.disabled=true; btn.querySelector('.spell-desc').innerHTML=`쿨타임<br>⏳${cd}턴`; }
+    else { if(!state.isOver) btn.disabled=false; btn.querySelector('.spell-desc').innerHTML=defaultDesc; }
   }
-  const btnL = document.getElementById('btnLumos');
-  if (state.lumosCooldown > 0) {
-    btnL.disabled = true;
-    btnL.querySelector('.spell-desc').innerHTML = `쿨타임<br>⏳${state.lumosCooldown}턴`;
-  } else {
-    btnL.disabled = false;
-    btnL.querySelector('.spell-desc').innerHTML = `MP 전체 회복<br>쿨타임 4턴`;
-  }
-  const btnI = document.getElementById('btnIncendio');
-  if (state.incendioCooldown > 0) {
-    btnI.disabled = true;
-    btnI.querySelector('.spell-desc').innerHTML = `쿨타임<br>⏳${state.incendioCooldown}턴`;
-  } else {
-    btnI.disabled = false;
-    btnI.querySelector('.spell-desc').innerHTML = `피해 30<br>화상 2턴`;
-  }
+  setCd(EL.btnAvada,    state.avadaCooldown,   '피해 50<br>쿨타임 3턴');
+  setCd(EL.btnLumos,    state.lumosCooldown,   'MP 전체 회복<br>쿨타임 4턴');
+  setCd(EL.btnIncendio, state.incendioCooldown,'피해 30<br>화상 2턴');
 
-  const spellCosts = [20,25,15,50,30,35,0];
-  document.querySelectorAll('.spell-btn').forEach((b, i) => {
-    if (b.disabled && i !== 3 && i !== 4 && i !== 5) return; 
-    if (state.harryMP < spellCosts[i]) b.disabled = true;
+  // ✅ FIX: MP 부족 체크 — 이미 쿨다운으로 disabled된 버튼은 건드리지 않음
+  const spellCosts=[20,25,15,50,30,35];
+  document.querySelectorAll('.spell-btn').forEach((b,i)=>{
+    if (!b.disabled && state.harryMP<spellCosts[i]) b.disabled=true;
   });
 }
 
-function hpColor(pct) {
-  if (pct > 60) return '#2ecc71';
-  if (pct > 30) return '#f1c40f';
-  return '#e74c3c';
-}
+function hpColor(p) { return p>60?'#2ecc71':p>30?'#f1c40f':'#e74c3c'; }
 function clampHP() {
-  state.harryHP = Math.max(0, Math.min(state.harryMaxHP, state.harryHP));
-  state.voldyHP = Math.max(0, Math.min(state.voldyMaxHP, state.voldyHP));
+  state.harryHP=Math.max(0,Math.min(state.harryMaxHP,state.harryHP));
+  state.voldyHP=Math.max(0,Math.min(state.voldyMaxHP,state.voldyHP));
 }
 function setButtonsEnabled(on) {
-  document.querySelectorAll('.spell-btn').forEach(b => b.disabled = !on);
+  // ✅ FIX: on=true 일 때 먼저 모두 활성화한 뒤 updateUI로 MP/쿨다운 재체크
+  document.querySelectorAll('.spell-btn').forEach(b=>b.disabled=!on);
   if (on) updateUI();
 }
 
-// ─── 게임 종료 ───────────────────────────────────────────────────────────────
+// ── 게임 종료 ──────────────────────────────────────────────────────────────────
 function checkGameOver() {
-  if (state.voldyHP <= 0) {
-    state.isOver = true; SFX.win(); stopBGM();
-    showGameover('⚡ 해리 포터 승리!', '볼드모트를 물리쳤습니다!', '#f0c060'); return true;
+  if (state.voldyHP<=0) {
+    state.isOver=true; SFX.win(); stopBGM();
+    showGameover('⚡ 해리 포터 승리!','볼드모트를 물리쳤습니다!','#f0c060'); return true;
   }
-  if (state.harryHP <= 0) {
-    state.isOver = true; SFX.lose(); stopBGM();
-    showGameover('💀 볼드모트 승리...', '해리가 쓰러졌습니다...', '#e74c3c'); return true;
+  if (state.harryHP<=0) {
+    state.isOver=true; SFX.lose(); stopBGM();
+    showGameover('💀 볼드모트 승리...','해리가 쓰러졌습니다...','#e74c3c'); return true;
   }
   return false;
 }
 
 function showGameover(title, sub, color) {
-  if (state.voldyHP <= 0) setSprite('voldy', 'hit');
-  if (state.harryHP <= 0) setSprite('harry', 'hit');
-  const accuracy = state.totalCrits + state.totalHits + state.totalMisses > 0
-    ? Math.round(state.totalCrits / (state.totalCrits + state.totalHits + state.totalMisses) * 100)
-    : 0;
-  document.getElementById('gameoverTitle').textContent = title;
-  document.getElementById('gameoverTitle').style.color = color;
-  document.getElementById('gameoverSub').textContent = sub;
-  document.getElementById('gameoverStats').innerHTML = `
-    총 턴: <b>${state.turnCount}</b> &nbsp;|&nbsp;
-    크리티컬: <b>${state.totalCrits}회</b> &nbsp;|&nbsp;
-    미스: <b>${state.totalMisses}회</b><br>
-    최고 연속 크리티컬: <b>${state.consecutiveCrit > 0 ? state.critCombo : 0}회</b> &nbsp;|&nbsp;
-    달성 레벨: <b>Lv.${state.harryLevel}</b><br>
-    크리티컬 비율: <b>${accuracy}%</b>
-  `;
-  document.getElementById('gameoverOverlay').style.display = 'flex';
+  if (state.voldyHP<=0) setSprite('voldy','hit');
+  if (state.harryHP<=0) setSprite('harry','hit');
+
+  const total = state.totalCrits+state.totalHits+state.totalMisses;
+  const acc   = total>0 ? Math.round(state.totalCrits/total*100) : 0;
+
+  document.getElementById('gameoverTitle').textContent=title;
+  document.getElementById('gameoverTitle').style.color=color;
+  document.getElementById('gameoverSub').textContent=sub;
+  document.getElementById('gameoverStats').innerHTML=
+    `총 턴: <b>${state.turnCount}</b> &nbsp;|&nbsp; 크리티컬: <b>${state.totalCrits}회</b> &nbsp;|&nbsp; 미스: <b>${state.totalMisses}회</b><br>`+
+    // ✅ FIX: maxCombo 올바르게 표시
+    `최고 연속 크리티컬: <b>${state.maxCombo}회</b> &nbsp;|&nbsp; 달성 레벨: <b>Lv.${state.harryLevel}</b><br>`+
+    `크리티컬 비율: <b>${acc}%</b>`;
+
+  document.getElementById('gameoverOverlay').style.display='flex';
 }
 
-// ─── 스프라이트 ──────────────────────────────────────────────────────────────
-const SPRITES = {
-  harry: { stand:'harry_stand.jpg', attack:'harry_attack.jpg', hit:'harry_hit.jpg' },
-  voldy: { stand:'voldy_stand.jpg', attack:'voldy_attack.jpg', hit:'voldy_hit.jpg' },
+// ── 스프라이트 & 애니메이션 ───────────────────────────────────────────────────
+const SPRITES={
+  harry:{stand:'harry_stand.jpg',attack:'harry_attack.jpg',hit:'harry_hit.jpg'},
+  voldy:{stand:'voldy_stand.jpg',attack:'voldy_attack.jpg',hit:'voldy_hit.jpg'},
 };
-function setSprite(who, st) {
-  const img = document.getElementById(who === 'harry' ? 'harryImg' : 'voldyImg');
-  if (img) img.src = SPRITES[who][st];
+function setSprite(who,st){
+  const img=document.getElementById(who==='harry'?'harryImg':'voldyImg');
+  if (img) img.src=SPRITES[who][st];
 }
-
-// ─── 애니메이션 ──────────────────────────────────────────────────────────────
 function animAttack(who) {
-  const el = document.getElementById(who === 'harry' ? 'harrySprite' : 'voldySprite');
+  const el=document.getElementById(who==='harry'?'harrySprite':'voldySprite');
   el.classList.remove('float-anim');
-  el.classList.add(who === 'harry' ? 'attack-anim' : 'vatk-anim');
-  setSprite(who, 'attack');
-  setTimeout(() => { el.classList.remove('attack-anim','vatk-anim'); el.classList.add('float-anim'); setSprite(who,'stand'); }, 700);
+  el.classList.add(who==='harry'?'attack-anim':'vatk-anim');
+  setSprite(who,'attack');
+  setTimeout(()=>{ el.classList.remove('attack-anim','vatk-anim'); el.classList.add('float-anim'); setSprite(who,'stand'); },700);
 }
 function animHit(who) {
-  setTimeout(() => {
-    const el = document.getElementById(who === 'harry' ? 'harrySprite' : 'voldySprite');
+  setTimeout(()=>{
+    const el=document.getElementById(who==='harry'?'harrySprite':'voldySprite');
     el.classList.remove('float-anim');
     el.classList.add('hit-anim','flash-anim');
-    setSprite(who, 'hit');
-    setTimeout(() => { el.classList.remove('hit-anim','flash-anim'); el.classList.add('float-anim'); if(!state.isOver) setSprite(who,'stand'); }, 600);
-  }, 300);
+    setSprite(who,'hit');
+    setTimeout(()=>{ el.classList.remove('hit-anim','flash-anim'); el.classList.add('float-anim'); if(!state.isOver) setSprite(who,'stand'); },600);
+  },300);
 }
-function showDmgPopup(target, dmg, hitType) {
-  const panel = document.getElementById(target === 'harry' ? 'harryPanel' : 'voldyPanel');
-  const p = document.createElement('div');
-  p.className = 'dmg-popup';
-  p.style.color = hitType === 'critical' ? '#f1c40f' : '#e74c3c';
-  p.textContent = (hitType === 'critical' ? '💥' : '') + '-' + dmg;
-  panel.appendChild(p);
-  setTimeout(() => p.remove(), 1300);
+function showDmgPopup(target,dmg,hitType){
+  const panel=document.getElementById(target==='harry'?'harryPanel':'voldyPanel');
+  const p=document.createElement('div'); p.className='dmg-popup';
+  p.style.color=hitType==='critical'?'#f1c40f':'#e74c3c';
+  p.textContent=(hitType==='critical'?'💥':'')+'-'+dmg;
+  panel.appendChild(p); setTimeout(()=>p.remove(),1300);
 }
-function showHealPopup(target, amt) {
-  const panel = document.getElementById(target === 'harry' ? 'harryPanel' : 'voldyPanel');
-  const p = document.createElement('div');
-  p.className = 'dmg-popup';
-  p.style.color = '#2ecc71';
-  p.textContent = '+' + amt;
-  panel.appendChild(p);
-  setTimeout(() => p.remove(), 1300);
+function showHealPopup(target,amt){
+  const panel=document.getElementById(target==='harry'?'harryPanel':'voldyPanel');
+  const p=document.createElement('div'); p.className='dmg-popup';
+  p.style.color='#2ecc71'; p.textContent='+'+amt;
+  panel.appendChild(p); setTimeout(()=>p.remove(),1300);
 }
 
-// ─── 로그 ────────────────────────────────────────────────────────────────────
-function addLog(msg, color='white') {
-  const box = document.getElementById('logBox');
-  const d = document.createElement('div');
-  d.className = 'log-entry'; d.style.color = color; d.textContent = msg;
-  box.appendChild(d); box.scrollTop = box.scrollHeight;
+function addLog(msg,color='white'){
+  const box=EL.logBox;
+  const d=document.createElement('div'); d.className='log-entry';
+  d.style.color=color; d.textContent=msg;
+  box.appendChild(d); box.scrollTop=box.scrollHeight;
 }
 
-// ─── 소리 안내 ───────────────────────────────────────────────────────────────
-function showSoundGuide() {
-  const t = document.getElementById('soundToast');
-  t.innerHTML = `🎵 배경음악(bgm.mp3)이 재생됩니다.<br>소리가 안 들리면 화면을 한 번 클릭해 보세요!`;
+function showSoundGuide(){
+  const t=document.getElementById('soundToast');
+  t.innerHTML=`🎵 bgm.mp3가 없으면 자동으로 Web Audio BGM으로 전환됩니다.<br>소리가 안 들리면 화면을 한 번 클릭해 보세요!`;
   t.classList.add('show');
-  try { playBGM(); } catch(e) {}
-  setTimeout(() => t.classList.remove('show'), 3500);
+  try{ playBGM(); }catch(e){}
+  setTimeout(()=>t.classList.remove('show'),3500);
 }
 
-// ─── 초기화 ──────────────────────────────────────────────────────────────────
+// ── 초기화 ────────────────────────────────────────────────────────────────────
+cacheEls();
 updateUI();
-document.addEventListener('click', () => { if(!bgPlaying) playBGM(); }, { once: true });
+document.addEventListener('click',()=>{ if(!bgPlaying) playBGM(); },{once:true});
 </script>
 </body>
 </html>
