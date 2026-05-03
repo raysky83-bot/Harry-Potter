@@ -600,6 +600,9 @@
 </head>
 <body>
 
+<!-- 🎵 오디오 플레이어 추가 (bgm.mp3) -->
+<audio id="bgmAudio" src="bgm.mp3" loop></audio>
+
 <!-- 별빛 배경 -->
 <div class="stars" id="stars"></div>
 <div id="resultFlash"></div>
@@ -887,19 +890,24 @@ const SFX = {
   timing_norm: () => playTone(1000,'sine',0.04,0.12),
 };
 
-// BGM — bgm.mp3
-const bgmAudio = new Audio('bgm.mp3');
-bgmAudio.loop = true;
-bgmAudio.volume = 0.5;
+// ─── BGM ─────────────────────────────────────────────────────────────────────
 let bgPlaying = false;
 
 function playBGM() {
   if (bgPlaying) return;
-  bgmAudio.play().then(() => { bgPlaying = true; }).catch(() => {});
+  const bgm = document.getElementById('bgmAudio');
+  if(bgm) {
+      bgm.volume = 0.5;
+      bgm.play().then(() => { bgPlaying = true; }).catch(() => {});
+  }
 }
+
 function stopBGM() {
-  bgmAudio.pause();
-  bgmAudio.currentTime = 0;
+  const bgm = document.getElementById('bgmAudio');
+  if(bgm) {
+      bgm.pause();
+      bgm.currentTime = 0;
+  }
   bgPlaying = false;
 }
 
@@ -915,6 +923,8 @@ function startTiming(spell) {
     addLog(`💬 MP 부족! (필요: ${cost}MP, 현재: ${state.harryMP}MP)`, '#e74c3c');
     return;
   }
+
+  playBGM(); // 💡 BGM 재생 추가!
 
   pendingSpell = spell;
 
