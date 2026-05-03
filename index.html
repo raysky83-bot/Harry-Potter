@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>⚡ 마법사의 결투 ⚡</title>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; background-color: #1a1a2e; color: white; text-align: center; margin: 0; }
+        h1 { color: #f39c12; margin-top: 20px;}
+        
+        /* 결투장 레이아웃 */
+        .battlefield { display: flex; justify-content: space-around; margin: 30px 0; align-items: flex-end; height: 350px;}
+        
+        /* 캐릭터 이미지 영역 */
+        .character-box { width: 40%; background: #16213e; padding: 20px; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; }
+        .name { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+        
+        /* 이미지 태그 스타일 */
+        .sprite { width: 200px; height: 250px; object-fit: contain; margin-bottom: 15px; transition: 0.2s; }
+        
+        /* HP 바 디자인 */
+        .hp-container { width: 100%; background: #333; height: 25px; border-radius: 10px; overflow: hidden; border: 2px solid #555; margin-bottom: 5px;}
+        .hp-bar { height: 100%; width: 100%; transition: width 0.3s, background-color 0.3s; background-color: #2ecc71; }
+        .hp-text { font-size: 18px; font-weight: bold;}
+
+        /* 게임 로그 */
+        #logBox { width: 80%; margin: 20px auto; background: #0f3460; height: 120px; overflow-y: scroll; padding: 10px; border-radius: 10px; text-align: left; line-height: 1.5; border: 2px solid #e94560; font-size: 15px;}
+
+        /* 주문 버튼 디자인 */
+        .controls { margin-top: 10px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;}
+        .spell-btn { background: #2c3e50; color: white; border: 2px solid #e94560; padding: 10px; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.2s; display: flex; flex-direction: column; align-items: center; width: 130px;}
+        .spell-btn:hover { background: #34495e; transform: translateY(-5px); border-color: #f1c40f; }
+        .spell-btn:disabled { background: #555; border-color: #333; cursor: not-allowed; transform: none; opacity: 0.5;}
+        .spell-icon { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; margin-bottom: 5px; }
+
+        /* 흔들림 애니메이션 */
+        @keyframes shake {
+            0%, 100% { transform: translate(1px, 1px) rotate(0deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+        }
+        .hit-anim { animation: shake 0.5s; }
+
+        /* 타이밍 스탑워치 오버레이 화면 */
+        #timingOverlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); z-index: 9999; flex-direction: column;
+            align-items: center; justify-content: center; backdrop-filter: blur(5px);
+        }
+        #stopwatchDisplay { font-size: 100px; font-weight: bold; margin: 20px 0; font-family: monospace; }
+        .stop-btn { background: #e74c3c; color: white; border: 4px solid #c0392b; border-radius: 50%; width: 150px; height: 150px; font-size: 30px; font-weight: bold; cursor: pointer; transition: 0.1s; }
+        .stop-btn:active { transform: scale(0.9); background: #c0392b; }
+
+    </style>
+</head>
+<body>
+
+    <!-- 타이밍 맞추기 스탑워치 화면 (기본은 숨겨져 있음) -->
+    <div id="timingOverlay">
+        <h2 style="color: #f39c12; font-size: 30px; margin:0;">정확히 5.00초에 멈추세요!</h2>
+        <p style="color: #bdc3c7;">(±0.5초: 크리티컬 / ±1.0초: 일반 / 그 외: 미스)</p>
+        <div id="stopwatchDisplay">0.00</div>
+        <button class="stop-btn" onclick="stopTiming()">STOP!</button>
+    </div>
+
+    <h1>⚡ 마법사의 결투 ⚡</h1>
+
+    <div class="battlefield">
+        <!-- 해리 진영 -->
+        <div class="character-box">
+            <div class="name">👓 해리 포터</div>
+            <img id="harrySprite" class="sprite" src="harry_stand.png" alt="해리">
+            <div class="hp-container"><div id="harryHpBar" class="hp-bar"></div></div>
+            <div id="harryHpText" class="hp-text">100 / 100</div>
+        </div>
+
+        <!-- 볼드모트 진영 -->
+        <div class="character-box">
+            <div class="name">🐍 볼드모트</div>
+            <img id="voldySprite" class="sprite" src="voldy_stand.png" alt="볼드모트">
+            <div class="hp-container"><div id="voldyHpBar" class="hp-bar"></div></div>
+            <div id="voldyHpText" class="hp-text">100 / 100</div>
+        </div>
+    </div>
+
+    <div id="logBox">
+        <div style="color: #f39c12;">[시스템] 결투가 시작되었습니다! 주문 버튼을 누르면 스탑워치가 켜집니다.</div>
+    </div>
+
+    <!-- 해리 주문 버튼 -->
+    <div class="controls" id="buttons">
+        <button class="spell-btn" onclick="startTiming('익스펙토')">
+            <img src="icon_lightning.png" class="spell-icon" alt="스킬">
+            Expelliarmus<br><span style="font-size:11px; color:#bdc3c7;">기본 공격</span>
+        </button>
+        <button class="spell-btn" onclick="startTiming('스투페파이')">
+            <img src="icon_swirl.png" class="spell-icon" alt="스킬">
+            Stupefy<br><span style="font-size:11px; color:#bdc3c7;">적 턴 스킵</span>
+        </button>
+        <button class="spell-btn" onclick="startTiming('프로테고')">
+            <img src="icon_shield.png" class="spell-icon" alt="스킬">
+            Protego<br><span style="font-size:11px; color:#bdc3c7;">HP 회복</span>
+        </button>
+        <button class="spell-btn" onclick="startTiming('아바다')" id="btnAvada">
+            <div style="width:60px; height:60px; background:#8e44ad; border-radius:8px; margin-bottom:5px; display:flex; align-items:center; justify-content:center; font-size:30px;">☠️</div>
+            Avada Kedavra<br><span style="font-size:11px; color:#bdc3c7;">강력 필살기</span>
+        </button>
+    </div>
+
+    <script>
+        let harryHP = 100;
+        let voldyHP = 100;
+        let turn = 1; 
+        let isGameOver = false;
+        let avadaCooldown = 0; 
+        let voldyPoison = 0;   
+
+        // 타이밍 관련 변수
+        let startTime = 0;
+        let timerInterval = null;
+        let pendingSpell = "";
+
+        const imgHarry = document.getElementById("harrySprite");
+        const imgVoldy = document.getElementById("voldySprite");
+
+        function addLog(message, color="white") {
+            const logBox = document.getElementById("logBox");
+            logBox.innerHTML += `<div style="color: ${color};">${message}</div>`;
+            logBox.scrollTop = logBox.scrollHeight; 
+        }
+
+        function updateUI() {
+            if(harryHP < 0) harryHP = 0;
+            if(voldyHP < 0) voldyHP = 0;
+
+            const hBar = document.getElementById("harryHpBar");
+            hBar.style.width = harryHP + "%";
+            document.getElementById("harryHpText").innerText = Math.round(harryHP) + " / 100";
+            if (harryHP > 60) hBar.style.backgroundColor = "#2ecc71"; 
+            else if (harryHP > 30) hBar.style.backgroundColor = "#f1c40f"; 
+            else hBar.style.backgroundColor = "#e74c3c"; 
+
+            const vBar = document.getElementById("voldyHpBar");
+            vBar.style.width = voldyHP + "%";
+            document.getElementById("voldyHpText").innerText = Math.round(voldyHP) + " / 100";
+            if (voldyHP > 60) vBar.style.backgroundColor = "#2ecc71";
+            else if (voldyHP > 30) vBar.style.backgroundColor = "#f1c40f";
+            else vBar.style.backgroundColor = "#e74c3c";
+
+            const btnAvada = document.getElementById("btnAvada");
+            if (avadaCooldown > 0) {
+                btnAvada.disabled = true;
+                btnAvada.innerHTML = `<div style="width:60px; height:60px; background:#555; border-radius:8px; margin-bottom:5px; display:flex; align-items:center; justify-content:center; font-size:30px;">⏳</div>쿨타임<br><span style="font-size:11px; color:#bdc3c7;">${avadaCooldown}턴 남음</span>`;
+            } else {
+                btnAvada.disabled = false;
+                btnAvada.innerHTML = `<div style="width:60px; height:60px; background:#8e44ad; border-radius:8px; margin-bottom:5px; display:flex; align-items:center; justify-content:center; font-size:30px;">☠️</div>Avada Kedavra<br><span style="font-size:11px; color:#bdc3c7;">강력 필살기</span>`;
+            }
+        }
+
+        function checkGameOver() {
+            if (voldyHP <= 0) {
+                addLog("🏆 볼드모트를 물리쳤습니다! 해리 승리!", "#f1c40f");
+                imgVoldy.src = "voldy_hit.png"; 
+                isGameOver = true;
+                document.getElementById("buttons").style.display = "none";
+            } else if (harryHP <= 0) {
+                addLog("💀 해리가 쓰러졌습니다... 볼드모트 승리...", "#e74c3c");
+                imgHarry.src = "harry_hit.png"; 
+                isGameOver = true;
+                document.getElementById("buttons").style.display = "none";
+            }
+        }
+
+        // ⏱️ 스탑워치 시작 함수
+        function startTiming(spellName) {
+            if (turn !== 1 || isGameOver) return; 
+            if (spellName === '아바다' && avadaCooldown > 0) return; // 쿨타임 막기
+
+            pendingSpell = spellName; // 선택한 마법 기억해두기
+            document.getElementById("timingOverlay").style.display = "flex";
+            
+            startTime = Date.now();
+            timerInterval = setInterval(() => {
+                let current = (Date.now() - startTime) / 1000;
+                let display = document.getElementById("stopwatchDisplay");
+                display.innerText = current.toFixed(2);
+                
+                // 크리티컬 구간(4.5 ~ 5.5)에서는 숫자가 노란색으로 변함!
+                if(current >= 4.50 && current <= 5.50) {
+                    display.style.color = "#f1c40f";
+                } else {
+                    display.style.color = "white";
+                }
+
+                // 7초 초과 시 자동 미스 처리 (강제 정지)
+                if (current >= 7.00) {
+                    stopTiming();
+                }
+            }, 10);
+        }
+
+        // ⏱️ 스탑워치 정지 및 결과 판정 함수
+        function stopTiming() {
+            clearInterval(timerInterval);
+            document.getElementById("timingOverlay").style.display = "none";
+            
+            let stoppedAt = (Date.now() - startTime) / 1000;
+            let diff = Math.abs(5.00 - stoppedAt);
+            
+            let hitType = "normal";
+            if (diff <= 0.50) hitType = "critical";
+            else if (diff <= 1.00) hitType = "normal";
+            else hitType = "miss";
+
+            addLog(`⏱️ 멈춘 시간: ${stoppedAt.toFixed(2)}초 (오차: ${diff.toFixed(2)}초)`, "#bdc3c7");
+            
+            // 판정 결과와 함께 마법 발사!
+            executeSpell(pendingSpell, hitType);
+        }
+
+        // 🟢 해리의 실제 마법 시전 (판정에 따른 결과 적용)
+        function executeSpell(spellName, hitType) {
+            imgHarry.src = "harry_attack.png";
+
+            // 타이밍 판정 세팅
+            let mult = 1.0;
+            let resultPrefix = "";
+            let logColor = "#3498db";
+
+            if (hitType === "critical") {
+                mult = 1.5; // 크리티컬 1.5배 데미지!
+                resultPrefix = "🔥[크리티컬!] ";
+                logColor = "#f1c40f"; // 로그 색상을 금색으로
+            } else if (hitType === "miss") {
+                mult = 0;   // 미스 나면 데미지 0
+                resultPrefix = "💨[미스...] ";
+                logColor = "#7f8c8d"; // 로그 색상을 회색으로
+            }
+
+            // 독 데미지 처리
+            if (voldyPoison > 0) {
+                harryHP -= 5;
+                voldyPoison -= 1;
+                addLog(`☠️ 크루시오 효과로 해리가 5의 데미지를 입었습니다! (남은 독: ${voldyPoison}턴)`, "#e74c3c");
+                imgHarry.classList.add("hit-anim"); 
+            }
+
+            // 마법 종류에 따른 계산 적용
+            if (spellName === '익스펙토') {
+                let dmg = 20 * mult;
+                addLog(`👓 해리: Expelliarmus!! ${resultPrefix}(볼드모트 HP -${dmg})`, logColor);
+                voldyHP -= dmg;
+                if (mult > 0) hitVoldemort(); 
+                turn = 2; 
+            } 
+            else if (spellName === '스투페파이') {
+                let dmg = 15 * mult;
+                let skipText = mult > 0 ? ", 적 턴 스킵!" : ""; // 미스나면 스킵도 적용 안 됨
+                addLog(`👓 해리: Stupefy!! ${resultPrefix}(볼드모트 HP -${dmg}${skipText})`, logColor);
+                voldyHP -= dmg;
+                
+                if (mult > 0) {
+                    hitVoldemort();
+                    turn = 1; // 성공해야 해리 턴 유지
+                } else {
+                    turn = 2; // 미스나면 얄짤없이 턴 넘어감
+                }
+            } 
+            else if (spellName === '프로테고') {
+                let heal = 15 * mult;
+                addLog(`👓 해리: Protego!! ${resultPrefix}(해리 HP ${heal} 회복)`, hitType === "critical" ? "#2ecc71" : logColor);
+                harryHP += heal;
+                if (harryHP > 100) harryHP = 100;
+                turn = 2;
+            } 
+            else if (spellName === '아바다') {
+                let dmg = 40 * mult;
+                addLog(`👓 해리: Avada Kedavra!!! ${resultPrefix}(볼드모트 HP -${dmg})`, hitType === "miss" ? logColor : "#9b59b6");
+                voldyHP -= dmg;
+                if (mult > 0) hitVoldemort();
+                avadaCooldown = 3; // 성공하든 빗나가든 쿨타임은 무조건 적용 (리스크)
+                turn = 2;
+            }
+
+            // 쿨타임 감소 로직
+            if (turn === 2 && avadaCooldown > 0 && spellName !== '아바다') {
+                avadaCooldown -= 1;
+            }
+
+            updateUI();
+            checkGameOver();
+
+            setTimeout(() => {
+                if(!isGameOver) imgHarry.src = "harry_stand.png";
+                imgHarry.classList.remove("hit-anim");
+            }, 1000);
+
+            if (turn === 2 && !isGameOver) {
+                document.getElementById("buttons").style.display = "none"; 
+                setTimeout(voldemortTurn, 2000); 
+            }
+        }
+
+        function hitVoldemort() {
+            setTimeout(() => {
+                imgVoldy.src = "voldy_hit.png";
+                imgVoldy.classList.add("hit-anim");
+                setTimeout(() => {
+                    if(!isGameOver) {
+                        imgVoldy.src = "voldy_stand.png";
+                        imgVoldy.classList.remove("hit-anim");
+                    }
+                }, 800); 
+            }, 300); 
+        }
+
+        // 🔴 볼드모트의 턴
+        function voldemortTurn() {
+            if (isGameOver) return;
+
+            imgVoldy.src = "voldy_attack.png";
+            let randomSpell = Math.floor(Math.random() * 3) + 1;
+
+            if (randomSpell === 1) {
+                addLog("🐍 볼드모트: Avada Kedavra! (해리 HP -35)", "#e74c3c");
+                harryHP -= 35;
+                hitHarry(); 
+                turn = 1;
+            } 
+            else if (randomSpell === 2) {
+                addLog("🐍 볼드모트: Crucio! (해리 HP -10, 3턴간 독 데미지)", "#e74c3c");
+                harryHP -= 10;
+                voldyPoison = 3;
+                hitHarry();
+                turn = 1;
+            } 
+            else if (randomSpell === 3) {
+                addLog("🐍 볼드모트: Imperio! (해리 HP -5, 해리 1턴 행동불가!)", "#e74c3c");
+                harryHP -= 5;
+                hitHarry();
+                turn = 2; 
+            }
+
+            updateUI();
+            checkGameOver();
+
+            setTimeout(() => {
+                if(!isGameOver) imgVoldy.src = "voldy_stand.png";
+            }, 1000);
+
+            if (turn === 1 && !isGameOver) {
+                setTimeout(() => {
+                    addLog("--------------------------------", "#7f8c8d");
+                    addLog("👓 해리의 턴입니다. 주문을 선택하세요.", "#3498db");
+                    document.getElementById("buttons").style.display = "flex"; 
+                }, 1500);
+            } else if (turn === 2 && !isGameOver) {
+                setTimeout(voldemortTurn, 2500); 
+            }
+        }
+
+        function hitHarry() {
+            setTimeout(() => {
+                imgHarry.src = "harry_hit.png";
+                imgHarry.classList.add("hit-anim");
+                setTimeout(() => {
+                    if(!isGameOver) {
+                        imgHarry.src = "harry_stand.png";
+                        imgHarry.classList.remove("hit-anim");
+                    }
+                }, 800);
+            }, 300);
+        }
+
+        updateUI();
+    </script>
+</body>
+</html>
