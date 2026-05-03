@@ -124,7 +124,6 @@
   .spell-btn:hover:not(:disabled)::before { opacity:1; }
   .spell-btn:disabled { opacity:0.38; cursor:not-allowed; transform:none; }
 
-  /* 턴 넘기기 버튼 스타일 */
   .spell-btn.s-wait { padding:8px 6px; }
   .spell-btn.s-wait::before  { background:var(--muted); }
   .spell-btn.s-wait:hover:not(:disabled) { border-color:var(--muted); box-shadow:0 4px 12px rgba(136,153,170,0.2); }
@@ -148,6 +147,32 @@
   .spell-cooldown { position:absolute; top:3px; right:5px; font-size:9px; color:var(--warn); font-weight:700; }
   .spell-mp-cost  { position:absolute; top:3px; left:5px;  font-size:9px; color:#7799ff; }
 
+  /* ── 난이도 선택 오버레이 ── */
+  #difficultyOverlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(10,10,24,0.98); z-index: 10000;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    backdrop-filter: blur(10px);
+  }
+  .diff-title { font-family: 'Cinzel', serif; font-size: 36px; color: var(--gold); margin-bottom: 10px; text-shadow: 0 0 20px var(--gold); text-align: center; }
+  .diff-subtitle { color: var(--muted); margin-bottom: 30px; font-size: 14px; text-align: center; line-height: 1.6; }
+  .diff-btn {
+    width: 240px; padding: 14px; margin-bottom: 12px;
+    background: var(--panel-bg); border: 2px solid;
+    color: white; font-size: 16px; font-weight: bold; border-radius: 8px;
+    cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; gap: 4px;
+  }
+  .diff-btn span { font-size: 11px; font-weight: normal; opacity: 0.8; }
+  .diff-btn:hover { transform: translateY(-3px); }
+  .btn-easy   { border-color: #2ecc71; color: #2ecc71; }
+  .btn-easy:hover { background: rgba(46,204,113,0.1); box-shadow: 0 0 15px rgba(46,204,113,0.4); }
+  .btn-normal { border-color: var(--gold); color: var(--gold); }
+  .btn-normal:hover { background: rgba(240,192,96,0.1); box-shadow: 0 0 15px rgba(240,192,96,0.4); }
+  .btn-hard   { border-color: #e67e22; color: #e67e22; }
+  .btn-hard:hover { background: rgba(230,126,34,0.1); box-shadow: 0 0 15px rgba(230,126,34,0.4); }
+  .btn-expert { border-color: #e74c3c; color: #e74c3c; }
+  .btn-expert:hover { background: rgba(231,76,60,0.1); box-shadow: 0 0 15px rgba(231,76,60,0.4); }
+
   /* ── 타이밍 오버레이 ── */
   #timingOverlay {
     display:none; position:fixed; top:0;left:0; width:100%;height:100%;
@@ -156,11 +181,6 @@
     backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
   }
   .timing-title { font-family:'Cinzel',serif; font-size:20px; color:var(--gold); letter-spacing:2px; }
-
-  /* ── 난이도 색 표시 ── */
-  .diff-easy   { color: #2ecc71; }
-  .diff-normal { color: var(--gold); }
-  .diff-hard   { color: #e74c3c; }
 
   .timing-target-info {
     display:flex; align-items:center; gap:12px;
@@ -198,7 +218,6 @@
   }
   .timing-marker { position:absolute; top:-4px; width:2px; height:calc(100% + 8px); background:var(--gold); border-radius:1px; box-shadow:0 0 6px var(--gold); }
 
-  /* ── Stupefy 전용: 크리티컬만 성공 강조 ── */
   .stupefy-warning {
     font-size:12px; color:#e74c3c; font-weight:700;
     background:rgba(231,76,60,0.1); border:1px solid rgba(231,76,60,0.4);
@@ -243,10 +262,9 @@
   #soundToast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--panel-bg); border:1px solid var(--panel-border); border-radius:8px; padding:10px 18px; font-size:12px; color:white; opacity:0; transition:all 0.3s; z-index:9999; pointer-events:none; max-width:300px; text-align:center; line-height:1.5; }
   #soundToast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
-  /* ── 볼드모트 폼 전환 이펙트 ── */
+  /* 애니메이션 */
   @keyframes formChange { 0%{filter:brightness(3) saturate(0)} 50%{filter:brightness(0.5) saturate(3) hue-rotate(120deg)} 100%{filter:brightness(1) saturate(1)} }
   .form-change-anim { animation:formChange 0.8s ease; }
-
   @keyframes shake { 0%,100%{transform:translateX(0)} 15%{transform:translateX(-8px) rotate(-1deg)} 30%{transform:translateX(8px) rotate(1deg)} 45%{transform:translateX(-5px)} 60%{transform:translateX(5px)} 75%{transform:translateX(-2px)} }
   @keyframes cast-attack { 0%{transform:translateX(0)} 30%{transform:translateX(18px) scale(1.15)} 100%{transform:translateX(0) scale(1)} }
   @keyframes cast-voldy  { 0%{transform:translateX(0)} 30%{transform:translateX(-18px) scale(1.15)} 100%{transform:translateX(0) scale(1)} }
@@ -257,7 +275,6 @@
   .vatk-anim   { animation:cast-voldy 0.5s ease; }
   .flash-anim  { animation:hit-flash 0.4s ease; }
   .float-anim  { animation:float 2s ease-in-out infinite; }
-
   .dmg-popup { position:absolute; top:10px; font-family:'Cinzel',serif; font-size:20px; font-weight:900; pointer-events:none; animation:dmgFloat 1.2s ease forwards; z-index:100; text-shadow:0 2px 8px rgba(0,0,0,0.8); }
   @keyframes dmgFloat { 0%{transform:translateY(0) scale(0.5);opacity:1} 60%{transform:translateY(-50px) scale(1.2);opacity:1} 100%{transform:translateY(-80px) scale(1);opacity:0} }
 
@@ -274,6 +291,32 @@
 </style>
 </head>
 <body>
+
+<!-- 🎵 오디오 플레이어 추가 -->
+<audio id="bgmAudio" src="bgm.mp3" loop></audio>
+
+<!-- ── 난이도 선택 오버레이 ── -->
+<div id="difficultyOverlay">
+  <div class="diff-title">난이도 선택</div>
+  <div class="diff-subtitle">볼드모트의 체력과 공격력이 결정됩니다.<br>마법사의 실력을 증명하세요!</div>
+  
+  <button class="diff-btn btn-easy" onclick="selectDifficulty('easy')">
+    🟢 쉬움 (Easy)
+    <span>볼드모트 HP 100 / 적 공격력 감소</span>
+  </button>
+  <button class="diff-btn btn-normal" onclick="selectDifficulty('normal')">
+    🟡 보통 (Normal)
+    <span>볼드모트 HP 160 / 표준 밸런스</span>
+  </button>
+  <button class="diff-btn btn-hard" onclick="selectDifficulty('hard')">
+    🟠 어려움 (Hard)
+    <span>볼드모트 HP 250 / 적 공격력 증가</span>
+  </button>
+  <button class="diff-btn btn-expert" onclick="selectDifficulty('expert')">
+    🔴 고수 (Expert)
+    <span>볼드모트 HP 400 / 극악의 적 데미지</span>
+  </button>
+</div>
 
 <div class="stars" id="stars"></div>
 <div id="resultFlash"></div>
@@ -297,7 +340,6 @@
     </div>
   </div>
 
-  <!-- 위험 경보 -->
   <div id="dangerBanner">⚠️ MP 위기! 턴 넘기기로 MP를 회복하세요</div>
   <div id="formBanner"></div>
 
@@ -331,7 +373,7 @@
       </div>
       <div class="status-badges" id="voldyBadges"></div>
       <div class="hp-section">
-        <div class="hp-label"><span>HP</span><span class="hp-num" id="voldyHpNum">150 / 150</span></div>
+        <div class="hp-label"><span>HP</span><span class="hp-num" id="voldyHpNum">160 / 160</span></div>
         <div class="hp-track"><div class="hp-fill" id="voldyHpBar" style="width:100%;background:#2ecc71;"></div></div>
         <div class="mp-track" style="background:rgba(180,74,255,0.12);">
           <div class="mp-fill" id="voldyMpBar" style="width:100%;background:linear-gradient(90deg,#8e44ad,#b44aff);"></div>
@@ -347,9 +389,7 @@
     <div class="log-entry" style="color:#8899aa;">💡 Stupefy 턴 스킵은 크리티컬(±0.15s)만 발동합니다. MP 부족시 턴 넘기기로 MP를 회복하세요.</div>
   </div>
 
-  <!-- ── 7버튼 레이아웃 ── -->
   <div class="spell-grid" id="spellGrid">
-    <!-- Row 1 -->
     <button class="spell-btn s-expel" onclick="startTiming('익스펙토')">
       <span class="spell-mp-cost">20MP</span>
       <img src="icon_lightning.jpg" class="spell-icon-img" alt="번개">
@@ -368,12 +408,11 @@
       <span class="spell-name">Protego</span>
       <span class="spell-desc">회복 20<br>방어막+재생</span>
     </button>
-    <!-- Row 2 -->
     <button class="spell-btn s-avada" onclick="startTiming('아바다')" id="btnAvada">
       <span class="spell-mp-cost">50MP</span>
       <span style="font-size:32px;line-height:1;">☠️</span>
       <span class="spell-name">Avada Kedavra</span>
-      <span class="spell-desc">피해 45<br>쿨타임 3턴</span>
+      <span class="spell-desc">피해 100~150<br>쿨타임 3턴</span>
     </button>
     <button class="spell-btn s-lumos" onclick="startTiming('루모스')" id="btnLumos">
       <span class="spell-mp-cost">30MP</span>
@@ -387,7 +426,6 @@
       <span class="spell-name">Incendio</span>
       <span class="spell-desc">피해 28<br>화상 2턴</span>
     </button>
-    <!-- Row 3: 턴 넘기기 (전폭) -->
     <button class="spell-btn s-wait spell-btn-wide" id="btnWait" onclick="doWait()">
       <span style="font-size:22px;line-height:1;">⏳</span>
       <span class="spell-name">턴 넘기기 (숨 고르기)</span>
@@ -412,7 +450,6 @@
     <div class="ph ph-norm" id="phNorm">✅ 일반 ±0.45s</div>
     <div class="ph ph-miss">💨 미스 그 외</div>
   </div>
-  <!-- Stupefy 전용 경고 -->
   <div class="stupefy-warning" id="stupefyWarning" style="display:none;">
     ⚡ Stupefy: 크리티컬만 턴 스킵! 일반 히트는 데미지만 발동
   </div>
@@ -453,11 +490,12 @@
   }
 })();
 
-// ── 상수 ───────────────────────────────────────────────────────────────────
-const HARRY_MAX_HP = 100, VOLDY_MAX_HP = 160;
+// ── 상수 및 난이도 설정 ───────────────────────────────────────────────────
+const HARRY_MAX_HP = 100;
+let VOLDY_MAX_HP = 160; 
 const HARRY_MAX_MP = 100, VOLDY_MAX_MP = 100;
 
-const LEVEL_EXP   = [0, 0, 30, 70, 120, 180];
+const LEVEL_EXP  = [0, 0, 30, 70, 120, 180];
 const LEVEL_BONUS = {
   2:{ hp:20, mp:20, desc:'HP+20, MP+20 보너스!' },
   3:{ hp:15, mp:15, desc:'HP+15, MP+15, 공격력 8% 증가!' },
@@ -465,15 +503,10 @@ const LEVEL_BONUS = {
   5:{ hp:25, mp:25, desc:'HP+25, MP+25, 최강 마법사!' },
 };
 
-// ✅ 밸런스 조정된 타이밍 상수
-// 기본 크리티컬 범위 0.15s (기존 0.20s에서 하향 → 더 어렵게)
-// 기본 일반 범위   0.45s (기존 0.50s에서 하향)
 const BASE_CRIT_RANGE = 0.15;
 const NORM_RANGE      = 0.45;
 const BAR_DURATION    = 8.0;
 
-// 목표 시간 범위 — 짧을수록 실질 난이도 UP (CRIT 범위는 동일하지만 바가 빨리 지나감)
-// 전반부: 쉬운 목표(2~4초), 후반부(20턴+): 짧은 목표 포함
 const TARGET_EASY   = [2.00, 2.50, 3.00, 3.50, 4.00];
 const TARGET_NORMAL = [1.50, 2.00, 2.50, 3.00, 3.50, 4.00, 4.50];
 const TARGET_HARD   = [1.00, 1.50, 2.00, 2.50, 3.00, 3.50, 4.00];
@@ -482,7 +515,7 @@ const TARGET_HARD   = [1.00, 1.50, 2.00, 2.50, 3.00, 3.50, 4.00];
 let state = {
   harryHP: HARRY_MAX_HP, harryMaxHP: HARRY_MAX_HP,
   harryMP: HARRY_MAX_MP, harryMaxMP: HARRY_MAX_MP,
-  voldyHP: VOLDY_MAX_HP, voldyMaxHP: VOLDY_MAX_HP,
+  voldyHP: 160, voldyMaxHP: 160,
   voldyMP: VOLDY_MAX_MP, voldyMaxMP: VOLDY_MAX_MP,
   turn: 1, turnCount: 1, isOver: false,
   avadaCooldown: 0, lumosCooldown: 0, incendioCooldown: 0,
@@ -491,25 +524,49 @@ let state = {
   harryRegen: 0,
   harryLevel: 1, harryExp: 0,
   voldyLevel: 1, voldyExp: 0,
-  critCombo: 0,
-  maxCombo: 0,
-  consecutiveCrit: 0,
+  critCombo: 0, maxCombo: 0, consecutiveCrit: 0,
   totalCrits: 0, totalHits: 0, totalMisses: 0, totalWaits: 0,
   harryAtkMult: 1.0,
   critRangeBonus: 0,
-  // 볼드모트 폼 전환 (1=기본, 2=분노, 3=최후)
-  voldyForm: 1,
-  voldyRage: false,   // 폼2: 피해 +30%
+  voldyForm: 1, voldyRage: false,
+  // 💡 해리 공격력 감소(harryDmgMult) 삭제! 1.0으로 고정
+  voldyAtkMult: 1.0,
+  harryDmgMult: 1.0 
 };
 
-// ── 타이밍 상태 ────────────────────────────────────────────────────────────
-let rafId        = null;
-let startTs      = 0;
-let pendingSpell = '';
-let targetTime   = 3.00;
-let isTiming     = false;
+// ── 난이도 선택 함수 ────────────────────────────────────────────────────────
+function selectDifficulty(level) {
+  if (level === 'easy') {
+    VOLDY_MAX_HP = 100;
+    state.voldyAtkMult = 0.7;
+    // 해리 마법 위력은 무조건 1.0 (감소/증폭 없음)
+    state.harryDmgMult = 1.0; 
+  } else if (level === 'normal') {
+    VOLDY_MAX_HP = 160;
+    state.voldyAtkMult = 1.0;
+    state.harryDmgMult = 1.0;
+  } else if (level === 'hard') {
+    VOLDY_MAX_HP = 250;
+    state.voldyAtkMult = 1.3;
+    state.harryDmgMult = 1.0;
+  } else if (level === 'expert') {
+    VOLDY_MAX_HP = 400;
+    state.voldyAtkMult = 1.6;
+    state.harryDmgMult = 1.0;
+  }
+  
+  state.voldyMaxHP = VOLDY_MAX_HP;
+  state.voldyHP = VOLDY_MAX_HP;
+  
+  document.getElementById('difficultyOverlay').style.display = 'none';
+  
+  playBGM(); 
+  updateUI();
+  addLog(`🌟 난이도 [${level.toUpperCase()}] 적용 완료! 결투를 시작합니다.`, '#2ecc71');
+}
 
-// 현재 주문의 실제 크리티컬 범위 (Stupefy는 더 좁게)
+// ── 타이밍 상태 ────────────────────────────────────────────────────────────
+let rafId = null, startTs = 0, pendingSpell = '', targetTime = 3.00, isTiming = false;
 let currentCritRange = BASE_CRIT_RANGE;
 
 // ── DOM 캐시 ───────────────────────────────────────────────────────────────
@@ -526,7 +583,6 @@ function cacheEls() {
   ].forEach(id => EL[id] = document.getElementById(id));
 }
 
-// ── 난이도별 목표 시간 선택 ────────────────────────────────────────────────
 function getTargetTime() {
   let pool;
   if (state.turnCount < 10)      pool = TARGET_EASY;
@@ -551,9 +607,8 @@ function startTiming(spell) {
   pendingSpell = spell;
   targetTime   = getTargetTime();
 
-  // ✅ Stupefy: 크리티컬 범위를 더 좁게
   if (spell === '스투페파이') {
-    currentCritRange = 0.12 + state.critRangeBonus; // 0.15 → 0.12로 더 어렵게
+    currentCritRange = 0.12 + state.critRangeBonus; 
     EL.stupefyWarning.style.display = 'block';
   } else {
     currentCritRange = BASE_CRIT_RANGE + state.critRangeBonus;
@@ -564,13 +619,11 @@ function startTiming(spell) {
   document.getElementById('timingSpellName').textContent = '✨ ' + names[spell];
   document.getElementById('targetTimeDisplay').textContent = targetTime.toFixed(2);
 
-  // 난이도 힌트 색상
   const critRDisp = (currentCritRange*1000|0)/1000;
   document.getElementById('critHint').textContent = `±${critRDisp.toFixed(2)}s → 크리티컬`;
   document.getElementById('phCrit').textContent   = `🔥 크리티컬 ±${critRDisp.toFixed(2)}s`;
   document.getElementById('phNorm').textContent   = `✅ 일반 ±${NORM_RANGE.toFixed(2)}s`;
 
-  // 바 위치
   const bw = EL.timingBarWrap.offsetWidth || 340;
   EL.tMarker.style.left = ((targetTime / BAR_DURATION) * bw - 1) + 'px';
   EL.tzNorm.style.left  = Math.max(0,(targetTime-NORM_RANGE)/BAR_DURATION*100)+'%';
@@ -593,17 +646,28 @@ function startTiming(spell) {
     const bw2     = EL.timingBarWrap.offsetWidth || 340;
     const pct     = Math.min(elapsed / BAR_DURATION, 1);
 
-    EL.timingCursor.style.left      = (pct * bw2 - 2) + 'px';
-    EL.stopwatchDisplay.textContent = elapsed.toFixed(2);
+    // 블라인드 모드 (필살기 전용)
+    const isBlindActive = (pendingSpell === '아바다' && elapsed > targetTime * 0.6);
 
-    const diff = Math.abs(targetTime - elapsed);
-    if (diff <= currentCritRange) {
-      EL.stopwatchDisplay.style.color = '#f1c40f'; SFX.tick();
-    } else if (diff <= NORM_RANGE) {
-      EL.stopwatchDisplay.style.color = '#2ecc71';
+    if (isBlindActive) {
+      EL.stopwatchDisplay.textContent = "? . ??";
+      EL.stopwatchDisplay.style.color = '#8e44ad';
+      EL.timingCursor.style.opacity = '0';
     } else {
-      EL.stopwatchDisplay.style.color = 'white';
+      EL.stopwatchDisplay.textContent = elapsed.toFixed(2);
+      EL.timingCursor.style.opacity = '1';
+
+      const diff = Math.abs(targetTime - elapsed);
+      if (diff <= currentCritRange) {
+        EL.stopwatchDisplay.style.color = '#f1c40f'; SFX.tick();
+      } else if (diff <= NORM_RANGE) {
+        EL.stopwatchDisplay.style.color = '#2ecc71';
+      } else {
+        EL.stopwatchDisplay.style.color = 'white';
+      }
     }
+
+    EL.timingCursor.style.left = (pct * bw2 - 2) + 'px';
 
     if (elapsed < BAR_DURATION + 0.5) {
       rafId = requestAnimationFrame(tick);
@@ -620,6 +684,7 @@ function doStop() {
   isTiming = false;
   if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
   EL.timingOverlay.style.display = 'none';
+  EL.timingCursor.style.opacity = '1';
 
   const stopped = (performance.now() - startTs) / 1000;
   const diff    = Math.abs(targetTime - stopped);
@@ -629,7 +694,6 @@ function doStop() {
   else if (diff <= NORM_RANGE)   { hitType='normal';   SFX.beep();     flashScreen('hit');  state.consecutiveCrit=0; state.totalHits++; }
   else                           { hitType='miss';     SFX.miss();     flashScreen('miss'); state.consecutiveCrit=0; state.totalMisses++; }
 
-  // 콤보 시스템
   if (hitType === 'critical') {
     state.critCombo++;
     state.maxCombo = Math.max(state.maxCombo, state.critCombo);
@@ -643,7 +707,6 @@ function doStop() {
     EL.comboDisplay.classList.remove('show');
   }
 
-  // ✅ 콤보 배율 상한 캡: 최대 1.5배 (기존 무제한 → 과도한 데미지 방지)
   const rawComboMult = (hitType==='critical' && state.critCombo>=2)
     ? (1 + (state.critCombo-1)*0.08) : 1.0;
   const comboMult = Math.min(rawComboMult, 1.5);
@@ -663,7 +726,6 @@ function flashScreen(type) {
   setTimeout(() => el.className='', 500);
 }
 
-// ── 턴 넘기기 (MP 회복) ────────────────────────────────────────────────────
 function doWait() {
   if (state.turn !== 1 || state.isOver) return;
   const mpGain = 20;
@@ -672,14 +734,12 @@ function doWait() {
   addLog(`⏳ 해리가 숨을 고릅니다. MP +${mpGain} 회복!`, '#8899aa');
   SFX.heal();
 
-  // 턴 넘기기 시에도 상태 이상 처리
   if (state.voldyPoison > 0) { state.voldyPoison--; }
   if (state.harryRegen > 0) {
     state.harryHP = Math.min(state.harryMaxHP, state.harryHP + 8);
     addLog(`💚 재생 +8HP (${state.harryRegen-1}턴 남음)`, '#2ecc71');
     state.harryRegen--;
   }
-  // 쿨다운 감소
   if (state.avadaCooldown > 0) state.avadaCooldown--;
   if (state.lumosCooldown > 0) state.lumosCooldown--;
   if (state.incendioCooldown > 0) state.incendioCooldown--;
@@ -736,37 +796,16 @@ const SFX = {
 };
 
 let bgPlaying = false;
-const bgmAudio = new Audio();
+const bgmAudio = document.getElementById('bgmAudio');
 bgmAudio.loop = true; bgmAudio.volume = 0.5;
-bgmAudio.addEventListener('error', startWebAudioBGM);
-
-let bgWebNodes=[], bgWebTimer=null, bgWebPlaying=false, bgEnabled=true;
 
 function playBGM() {
   if (bgPlaying) return;
-  bgmAudio.src = 'bgm.mp3';
-  bgmAudio.play().then(()=>{ bgPlaying=true; }).catch(()=>{ startWebAudioBGM(); });
-}
-function startWebAudioBGM() {
-  if (bgWebPlaying || !bgEnabled) return;
-  bgWebPlaying=true;
-  const ctx=getAudioCtx();
-  [[55,0.035],[73.4,0.028],[82.4,0.022],[110,0.018]].forEach(([f,v])=>{
-    try{ const o=ctx.createOscillator(),g=ctx.createGain(); o.type='sine'; o.frequency.value=f; g.gain.value=v; o.connect(g); g.connect(ctx.destination); o.start(); bgWebNodes.push(o,g); }catch(e){}
-  });
-  let beat=0; const mel=[440,392,349,392,523,392,349,330];
-  function nx(){
-    if (!bgEnabled) return;
-    try{ const c=getAudioCtx(),o=c.createOscillator(),g=c.createGain(); o.type='sine'; o.frequency.value=mel[beat%mel.length]; g.gain.setValueAtTime(0.06,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+1.1); o.connect(g); g.connect(c.destination); o.start(); o.stop(c.currentTime+1.1); beat++; }catch(e){}
-    bgWebTimer=setTimeout(nx,1380);
-  }
-  bgWebTimer=setTimeout(nx,700);
+  bgmAudio.play().then(()=>{ bgPlaying=true; }).catch(()=>{});
 }
 function stopBGM() {
-  bgPlaying=false; bgEnabled=false;
+  bgPlaying=false;
   bgmAudio.pause(); bgmAudio.currentTime=0;
-  bgWebNodes.forEach(n=>{try{n.stop&&n.stop();}catch(e){}});
-  bgWebNodes=[]; clearTimeout(bgWebTimer);
 }
 
 // ── 주문 실행 ──────────────────────────────────────────────────────────────
@@ -780,7 +819,6 @@ function executeSpell(spell, hitType, comboMult=1.0) {
 
   state.harryMP = Math.max(0, state.harryMP - cost);
 
-  // 독 처리
   if (state.voldyPoison > 0) {
     if (!state.harryShield) {
       state.harryHP -= 5;
@@ -792,7 +830,6 @@ function executeSpell(spell, hitType, comboMult=1.0) {
     state.voldyPoison--;
   }
 
-  // 화상 처리
   if (state.voldyBurn > 0) {
     if (!isMiss) {
       const bd = 8;
@@ -803,7 +840,6 @@ function executeSpell(spell, hitType, comboMult=1.0) {
     state.voldyBurn--;
   }
 
-  // 재생
   if (state.harryRegen > 0) {
     state.harryHP = Math.min(state.harryMaxHP, state.harryHP + 8);
     addLog(`💚 재생 +8HP (${state.harryRegen-1}턴 남음)`, '#2ecc71');
@@ -814,20 +850,19 @@ function executeSpell(spell, hitType, comboMult=1.0) {
   animAttack('harry');
 
   if (spell === '익스펙토') {
-    // ✅ 기본 피해 22 (기존 25에서 하향)
-    const dmg = Math.round(22 * mult * atkMult);
+    // 💡 해리 데미지는 항상 1.0 배율을 사용 (state.harryDmgMult 고정값 적용)
+    const dmg = Math.round(22 * mult * atkMult * state.harryDmgMult);
     addLog(`⚡ 해리: Expelliarmus! ${prefix}→ 볼드모트 -${dmg}HP`, logClr);
     if (mult > 0) { state.voldyHP -= dmg; animHit('voldy'); showDmgPopup('voldy',dmg,hitType); SFX.hit(); gainExp('harry',10+(isCrit?10:0)); }
     state.turn = 2;
 
   } else if (spell === '스투페파이') {
-    // ✅ 핵심 변경: 크리티컬만 턴 스킵, 일반 히트는 데미지만
-    const dmg = Math.round(15 * mult * atkMult);
+    const dmg = Math.round(15 * mult * atkMult * state.harryDmgMult);
     if (isCrit) {
       addLog(`🌀 해리: Stupefy! [크리티컬!] → 볼드모트 -${dmg}HP + 턴 스킵!`, '#f1c40f');
       state.voldyHP -= dmg; animHit('voldy'); showDmgPopup('voldy',dmg,'critical');
       SFX.stupefy(); state.voldyStunned = true; gainExp('harry',20);
-      state.turn = 1; // 해리 연속 턴
+      state.turn = 1; 
     } else if (!isMiss) {
       addLog(`🌀 해리: Stupefy! → 볼드모트 -${dmg}HP (일반 히트: 턴 스킵 없음)`, '#4a9eff');
       state.voldyHP -= dmg; animHit('voldy'); showDmgPopup('voldy',dmg,'normal');
@@ -851,11 +886,16 @@ function executeSpell(spell, hitType, comboMult=1.0) {
     state.turn = 2;
 
   } else if (spell === '아바다') {
-    // ✅ 기본 피해 45 (기존 50→45), 콤보 캡 적용으로 최대 45*1.5*1.5*1.08 ≒ 109 → 45*1.5*1.5 = 101 → 콤보캡 1.5으로 최대 45*1.5*1.5 = 101
-    // 추가: atk 배율 1.1 기준 최대 101*1.1 = 111 → 볼드모트 MaxHP 160으로 원샷 방지
-    const dmg = Math.round(45 * mult * atkMult);
+    // 필살기 데미지 100~150 + 크리티컬 보너스 (난이도 감소 삭제)
+    let baseDmg = Math.floor(Math.random() * 51) + 100;
+    let avadaMult = mult;
+    if (isCrit) { avadaMult = (1.5 + Math.random() * 1.0) * comboMult; }
+    
+    let dmg = Math.round(baseDmg * avadaMult * atkMult * state.harryDmgMult);
+    if (isMiss) dmg = 0;
+
     addLog(`☠️ 해리: Avada Kedavra!!! ${prefix}→ 볼드모트 -${dmg}HP`, isMiss?'#8899aa':'#9b59b6');
-    if (mult > 0) { state.voldyHP -= dmg; animHit('voldy'); showDmgPopup('voldy',dmg,hitType); SFX.avada(); gainExp('harry',20+(isCrit?20:0)); }
+    if (dmg > 0) { state.voldyHP -= dmg; animHit('voldy'); showDmgPopup('voldy',dmg,hitType); SFX.avada(); gainExp('harry',30+(isCrit?10:0)); }
     state.avadaCooldown = 3; state.turn = 2;
 
   } else if (spell === '루모스') {
@@ -867,24 +907,19 @@ function executeSpell(spell, hitType, comboMult=1.0) {
     state.lumosCooldown = 4; state.turn = 2;
 
   } else if (spell === '인센디오') {
-    // ✅ 기본 피해 28 (기존 30→28)
-    const dmg = Math.round(28 * mult * atkMult);
+    const dmg = Math.round(28 * mult * atkMult * state.harryDmgMult);
     addLog(`🔥 해리: Incendio! ${prefix}→ 볼드모트 -${dmg}HP${mult>0?', 화상!':''}`, isMiss?'#8899aa':'#ff6b35');
     if (mult > 0) { state.voldyHP -= dmg; animHit('voldy'); showDmgPopup('voldy',dmg,hitType); SFX.incendio(); state.voldyBurn=(isCrit?3:2); gainExp('harry',15+(isCrit?15:0)); }
     state.incendioCooldown = 3; state.turn = 2;
   }
 
-  // 쿨다운 감소 (현재 시전한 주문 제외)
-  if (state.avadaCooldown > 0   && spell !== '아바다')   state.avadaCooldown--;
-  if (state.lumosCooldown > 0   && spell !== '루모스')   state.lumosCooldown--;
+  if (state.avadaCooldown > 0    && spell !== '아바다')   state.avadaCooldown--;
+  if (state.lumosCooldown > 0    && spell !== '루모스')   state.lumosCooldown--;
   if (state.incendioCooldown > 0 && spell !== '인센디오') state.incendioCooldown--;
 
-  // ✅ 해리 MP 자연회복 6 (기존 8에서 하향 → MP 관리 더 중요)
   state.harryMP = Math.min(state.harryMaxMP, state.harryMP + 6);
-
   state.turnCount++;
 
-  // ✅ 볼드모트 폼 전환 체크
   checkVoldyForm();
 
   clampHP(); updateUI();
@@ -943,7 +978,7 @@ function gainExp(who, amount) {
       if (b) {
         state.harryMaxHP += b.hp; state.harryHP = Math.min(state.harryMaxHP, state.harryHP+b.hp);
         state.harryMaxMP += b.mp; state.harryMP = Math.min(state.harryMaxMP, state.harryMP+b.mp);
-        if (state.harryLevel >= 3) state.harryAtkMult = 1.08; // ✅ 1.10 → 1.08
+        if (state.harryLevel >= 3) state.harryAtkMult = 1.08; 
         if (state.harryLevel >= 4) state.critRangeBonus = 0.04;
         showLevelup(`Lv.${state.harryLevel} 달성! ${b.desc}`);
       }
@@ -975,7 +1010,7 @@ function showLevelup(desc) {
   setTimeout(()=>ov.style.display='none', 2500);
 }
 
-// ── 볼드모트 AI (개선: 해리 상태 참조) ─────────────────────────────────────
+// ── 볼드모트 AI ─────────────────────────────────────────────────────────────
 function voldemortTurn() {
   if (state.isOver) return;
   EL.voldyThinking.classList.remove('visible');
@@ -991,40 +1026,33 @@ function voldemortTurn() {
   animAttack('voldy'); SFX.voldy();
 
   const hpR    = state.voldyHP / state.voldyMaxHP;
-  const harryLowMP = state.harryMP <= 30;          // 해리 MP 낮음 감지
-  const harryLowHP = state.harryHP <= 40;           // 해리 HP 낮음 감지
-  const harryShielded = state.harryShield;           // 해리 방어막 감지
+  const harryLowMP = state.harryMP <= 30;
+  const harryLowHP = state.harryHP <= 40;
+  const harryShielded = state.harryShield;
   const roll   = Math.random();
-  const rageMult = state.voldyRage ? 1.3 : 1.0;    // 분노 배율
+  const rageMult = state.voldyRage ? 1.3 : 1.0;
 
-  // ✅ 스마트 AI: 해리 상태에 따라 전략 변경
   if (harryLowHP && hpR < 0.7) {
-    // 해리 HP 낮으면 강공격 집중
     if (roll < 0.70) voldyAvada(rageMult);
     else if (roll < 0.90) voldyCrucio(rageMult);
     else voldyImperio(rageMult);
   } else if (harryShielded) {
-    // 해리 방어막 있으면 독/지속 딜 선호
     if (roll < 0.50) voldyCrucio(rageMult);
     else if (roll < 0.75) voldyImperio(rageMult);
     else voldyAvada(rageMult);
   } else if (harryLowMP) {
-    // 해리 MP 낮으면 제어기 선호 (다음 턴에도 공격 못하게)
     if (roll < 0.45) voldyImperio(rageMult);
     else if (roll < 0.75) voldyCrucio(rageMult);
     else voldyAvada(rageMult);
   } else if (hpR < 0.25) {
-    // 최후 저항: 올인 공격
     if (roll < 0.70) voldyAvada(rageMult);
     else if (roll < 0.88) voldyCrucio(rageMult);
     else voldyImperio(rageMult);
   } else if (hpR < 0.55) {
-    // 중반: 균형
     if (roll < 0.32) voldyAvada(rageMult);
     else if (roll < 0.66) voldyCrucio(rageMult);
     else voldyImperio(rageMult);
   } else {
-    // 초반: 독/제어 선호
     if (roll < 0.18) voldyAvada(rageMult);
     else if (roll < 0.60) voldyCrucio(rageMult);
     else voldyImperio(rageMult);
@@ -1037,8 +1065,7 @@ function voldemortTurn() {
 }
 
 function voldyAvada(rageMult=1.0) {
-  // ✅ 피해 하향: 28+Lv*2 → 24+Lv*2, 분노 배율 적용
-  const base = Math.round((24 + state.voldyLevel*2) * rageMult);
+  const base = Math.round((24 + state.voldyLevel*2) * rageMult * state.voldyAtkMult);
   const dmg  = state.harryShield ? Math.round(base*0.25) : base;
   addLog(`🐍 볼드모트: Avada Kedavra! → 해리 -${dmg}HP${state.harryShield?' (방어막 경감!)':''}${state.voldyRage?' [분노]':''}`, '#e74c3c');
   state.harryHP -= dmg; state.harryShield = false;
@@ -1046,24 +1073,23 @@ function voldyAvada(rageMult=1.0) {
 }
 function voldyCrucio(rageMult=1.0) {
   if (state.voldyPoison > 0) {
-    const base = Math.round((16 + state.voldyLevel*2) * rageMult);
+    const base = Math.round((16 + state.voldyLevel*2) * rageMult * state.voldyAtkMult);
     const dmg  = state.harryShield ? 4 : base;
     addLog(`🐍 볼드모트: Sectumsempra! → 해리 -${dmg}HP${state.voldyRage?' [분노]':''}`, '#e74c3c');
     state.harryHP -= dmg; state.harryShield = false;
     animHit('harry'); showDmgPopup('harry',dmg,'normal'); SFX.hit();
   } else {
-    const base = Math.round((6 + state.voldyLevel) * rageMult);
+    const base = Math.round((6 + state.voldyLevel) * rageMult * state.voldyAtkMult);
     const dmg  = state.harryShield ? 2 : base;
-    const turns = state.voldyForm >= 2 ? 4 : 3; // 분노 시 독 지속 연장
+    const turns = state.voldyForm >= 2 ? 4 : 3; 
     addLog(`🐍 볼드모트: Crucio! → 해리 -${dmg}HP, ${turns}턴 독(-5HP/턴)${state.voldyRage?' [분노]':''}`, '#e74c3c');
     state.harryHP -= dmg; state.voldyPoison = turns; state.harryShield = false;
     animHit('harry'); showDmgPopup('harry',dmg,'normal'); SFX.poison();
   }
 }
 function voldyImperio(rageMult=1.0) {
-  const base = Math.round((4 + state.voldyLevel) * rageMult);
+  const base = Math.round((4 + state.voldyLevel) * rageMult * state.voldyAtkMult);
   const dmg  = state.harryShield ? 2 : base;
-  // ✅ 최후 저항 폼(3)에서 Imperio → 2턴 행동 불능으로 강화
   const stunTurns = state.voldyForm >= 3 ? 2 : 1;
   addLog(`🐍 볼드모트: Imperio! → 해리 -${dmg}HP, ${stunTurns}턴 행동 불능!${state.voldyRage?' [분노]':''}`, '#e74c3c');
   state.harryHP -= dmg; state.harryStunned = stunTurns; state.harryShield = false;
@@ -1077,13 +1103,11 @@ function endVoldyTurn() {
     state.turn = 1;
     addLog('─────────────────────────────','#2a2a5a');
 
-    // harryStunned는 이제 숫자 (턴 수)
     if (state.harryStunned > 0) {
       addLog(`⚡ 해리가 Imperio에 걸려 행동 불능! (남은 턴: ${state.harryStunned})`, '#f1c40f');
       state.harryStunned--;
       state.turnCount++;
       state.harryMP = Math.min(state.harryMaxMP, state.harryMP + 6);
-      // 쿨다운 감소
       if (state.avadaCooldown > 0) state.avadaCooldown--;
       if (state.lumosCooldown > 0) state.lumosCooldown--;
       if (state.incendioCooldown > 0) state.incendioCooldown--;
@@ -1129,11 +1153,9 @@ function updateUI() {
   EL.turnCount.textContent = `턴 ${state.turnCount}`;
   EL.bestComboNum.textContent = state.maxCombo;
 
-  // 위험 배너
   const onlyWaitAvailable = state.harryMP < 15;
   EL.dangerBanner.style.display = onlyWaitAvailable ? 'block' : 'none';
 
-  // 상태 뱃지
   EL.harryBadges.innerHTML = '';
   if (state.voldyPoison > 0) EL.harryBadges.innerHTML += `<span class="badge badge-poison">☠️독 ${state.voldyPoison}턴</span>`;
   if (state.harryShield)     EL.harryBadges.innerHTML += `<span class="badge badge-shield">🛡방어막</span>`;
@@ -1145,16 +1167,14 @@ function updateUI() {
   if (state.voldyStunned)    EL.voldyBadges.innerHTML += `<span class="badge badge-stun">⚡행동불가</span>`;
   if (state.voldyRage)       EL.voldyBadges.innerHTML += `<span class="badge badge-rage">😡분노</span>`;
 
-  // 쿨다운 버튼
   function setCd(btn, cd, defaultDesc) {
     if (cd > 0) { btn.disabled=true; btn.querySelector('.spell-desc').innerHTML=`쿨타임<br>⏳${cd}턴`; }
     else { if(!state.isOver) btn.disabled=false; btn.querySelector('.spell-desc').innerHTML=defaultDesc; }
   }
-  setCd(EL.btnAvada,    state.avadaCooldown,    '피해 45<br>쿨타임 3턴');
+  setCd(EL.btnAvada,    state.avadaCooldown,    '피해 100~150<br>쿨타임 3턴');
   setCd(EL.btnLumos,    state.lumosCooldown,    'MP 전체 회복<br>쿨타임 4턴');
   setCd(EL.btnIncendio, state.incendioCooldown, '피해 28<br>화상 2턴');
 
-  // MP 부족 체크 (쿨다운 disabled 버튼은 건드리지 않음)
   const spellCosts = [20,30,15,50,30,35];
   document.querySelectorAll('.spell-btn:not(.s-wait)').forEach((b,i)=>{
     if (!b.disabled && state.harryMP < spellCosts[i]) b.disabled = true;
@@ -1251,7 +1271,7 @@ function addLog(msg, color='white') {
 
 function showSoundGuide() {
   const t = document.getElementById('soundToast');
-  t.innerHTML = `🎵 bgm.mp3가 없으면 자동으로 Web Audio BGM으로 전환됩니다.<br>소리가 안 들리면 화면을 한 번 클릭해 보세요!`;
+  t.innerHTML = `🎵 배경음악(bgm.mp3)이 재생됩니다.<br>소리가 안 들리면 화면을 한 번 클릭해 보세요!`;
   t.classList.add('show');
   try { playBGM(); } catch(e) {}
   setTimeout(()=>t.classList.remove('show'), 3500);
@@ -1259,8 +1279,7 @@ function showSoundGuide() {
 
 // ── 초기화 ─────────────────────────────────────────────────────────────────
 cacheEls();
-updateUI();
-document.addEventListener('click', ()=>{ if(!bgPlaying) playBGM(); }, {once:true});
+// updateUI()는 난이도 선택 후에 호출됩니다.
 </script>
 </body>
 </html>
