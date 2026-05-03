@@ -7,8 +7,8 @@
 <style>
   :root {
     --gold: #f0c060;
-    --dark-bg: #0d0d1a;
-    --panel-bg: #12122a;
+    --dark-bg: #0a0a18;
+    --panel-bg: #10102a;
     --panel-border: #2a2a5a;
     --harry-color: #4a9eff;
     --voldy-color: #b44aff;
@@ -28,44 +28,62 @@
     overflow-x: hidden;
   }
 
-  /* 배경 별빛 효과 */
+  /* 배경 별빛 */
+  .stars {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle linear infinite;
+  }
+  @keyframes twinkle {
+    0%,100% { opacity: 0.1; transform: scale(1); }
+    50% { opacity: 0.9; transform: scale(1.4); }
+  }
+
+  /* 배경 그라디언트 오로라 */
   body::before {
     content: '';
     position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background-image:
-      radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.4) 0%, transparent 100%),
-      radial-gradient(1px 1px at 60% 10%, rgba(255,255,255,0.3) 0%, transparent 100%),
-      radial-gradient(1px 1px at 80% 50%, rgba(255,255,255,0.25) 0%, transparent 100%),
-      radial-gradient(1px 1px at 40% 70%, rgba(255,255,255,0.2) 0%, transparent 100%),
-      radial-gradient(2px 2px at 10% 80%, rgba(255,255,255,0.15) 0%, transparent 100%),
-      radial-gradient(1px 1px at 90% 25%, rgba(255,255,255,0.35) 0%, transparent 100%);
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(ellipse at 20% 30%, rgba(74,158,255,0.04) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 70%, rgba(180,74,255,0.04) 0%, transparent 50%);
     pointer-events: none;
     z-index: 0;
+    animation: aurora 8s ease-in-out infinite alternate;
+  }
+  @keyframes aurora {
+    0% { transform: rotate(0deg) scale(1); }
+    100% { transform: rotate(5deg) scale(1.05); }
   }
 
-  .wrapper { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 20px; }
+  .wrapper { position: relative; z-index: 1; max-width: 920px; margin: 0 auto; padding: 16px; }
 
-  /* 헤더 */
   .game-title {
     font-family: 'Cinzel', serif;
-    font-size: 32px;
+    font-size: 30px;
     color: var(--gold);
     text-align: center;
     letter-spacing: 4px;
-    padding: 20px 0 5px;
-    text-shadow: 0 0 30px rgba(240,192,96,0.5);
+    padding: 16px 0 4px;
+    text-shadow: 0 0 40px rgba(240,192,96,0.6), 0 0 80px rgba(240,192,96,0.2);
   }
   .game-subtitle {
     text-align: center;
     color: var(--muted);
-    font-size: 12px;
-    letter-spacing: 3px;
-    margin-bottom: 20px;
+    font-size: 11px;
+    letter-spacing: 4px;
+    margin-bottom: 14px;
   }
 
-  /* 상태 바 (턴 + 소리 버튼) */
+  /* 상태 바 */
   .status-bar {
     display: flex;
     align-items: center;
@@ -73,16 +91,29 @@
     background: var(--panel-bg);
     border: 1px solid var(--panel-border);
     border-radius: 8px;
-    padding: 8px 16px;
-    margin-bottom: 16px;
+    padding: 8px 14px;
+    margin-bottom: 12px;
     font-size: 13px;
   }
-  #turnIndicator {
-    font-weight: 700;
-    font-size: 14px;
-    color: var(--harry-color);
+  #turnIndicator { font-weight: 700; font-size: 14px; color: var(--harry-color); }
+  .turn-count { color: var(--muted); font-size: 11px; }
+
+  /* 연속 콤보 표시 */
+  .combo-area {
+    display: flex;
+    align-items: center;
+    gap: 6px;
   }
-  .turn-count { color: var(--muted); font-size: 12px; }
+  #comboDisplay {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    color: var(--warn);
+    font-weight: 700;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  #comboDisplay.show { opacity: 1; }
+
   .sound-btn {
     background: none;
     border: 1px solid var(--panel-border);
@@ -90,7 +121,7 @@
     border-radius: 6px;
     padding: 4px 10px;
     cursor: pointer;
-    font-size: 18px;
+    font-size: 16px;
     transition: 0.2s;
   }
   .sound-btn:hover { border-color: var(--gold); color: var(--gold); }
@@ -101,171 +132,130 @@
     grid-template-columns: 1fr auto 1fr;
     gap: 10px;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
   }
 
   .fighter-panel {
     background: var(--panel-bg);
     border: 1px solid var(--panel-border);
     border-radius: 12px;
-    padding: 16px;
+    padding: 14px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
-    transition: border-color 0.3s;
+    gap: 7px;
+    transition: border-color 0.3s, box-shadow 0.3s;
     position: relative;
     overflow: hidden;
   }
   .fighter-panel.harry-panel { border-left: 3px solid var(--harry-color); }
   .fighter-panel.voldy-panel { border-right: 3px solid var(--voldy-color); }
-  .fighter-panel.active-turn { box-shadow: 0 0 20px rgba(240,192,96,0.2); border-color: var(--gold); }
+  .fighter-panel.active-turn { box-shadow: 0 0 25px rgba(240,192,96,0.15); border-color: var(--gold); }
 
-  .fighter-name {
-    font-family: 'Cinzel', serif;
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 1px;
-  }
+  .fighter-name { font-family: 'Cinzel', serif; font-size: 13px; font-weight: 700; letter-spacing: 1px; }
   .harry-panel .fighter-name { color: var(--harry-color); }
   .voldy-panel .fighter-name { color: var(--voldy-color); }
 
+  /* 레벨/경험치 */
+  .level-badge {
+    font-size: 10px;
+    background: rgba(240,192,96,0.15);
+    border: 1px solid rgba(240,192,96,0.3);
+    color: var(--gold);
+    padding: 1px 7px;
+    border-radius: 8px;
+    font-weight: 700;
+  }
+
   .sprite-area {
-    width: 150px;
-    height: 190px;
+    width: 140px;
+    height: 180px;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
-    transition: transform 0.2s;
   }
   .sprite-img {
-    width: 150px;
-    height: 190px;
+    width: 140px;
+    height: 180px;
     object-fit: contain;
     image-rendering: pixelated;
     transition: filter 0.15s;
   }
 
-  /* 상태이상 뱃지 */
-  .status-badges {
-    display: flex;
-    gap: 4px;
-    flex-wrap: wrap;
-    justify-content: center;
-    min-height: 24px;
-  }
-  .badge {
-    font-size: 10px;
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-weight: 700;
-  }
-  .badge-poison { background: rgba(180,74,255,0.2); color: #b44aff; border: 1px solid #b44aff; }
-  .badge-stun { background: rgba(241,196,15,0.2); color: var(--warn); border: 1px solid var(--warn); }
-  .badge-shield { background: rgba(74,158,255,0.2); color: var(--harry-color); border: 1px solid var(--harry-color); }
+  /* 상태이상 */
+  .status-badges { display: flex; gap: 3px; flex-wrap: wrap; justify-content: center; min-height: 22px; }
+  .badge { font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 700; }
+  .badge-poison  { background: rgba(180,74,255,0.15); color: #b44aff; border: 1px solid #b44aff; }
+  .badge-stun    { background: rgba(241,196,15,0.15); color: var(--warn); border: 1px solid var(--warn); }
+  .badge-shield  { background: rgba(74,158,255,0.15); color: var(--harry-color); border: 1px solid var(--harry-color); }
+  .badge-burn    { background: rgba(231,76,60,0.15); color: #e74c3c; border: 1px solid #e74c3c; }
+  .badge-regen   { background: rgba(46,204,113,0.15); color: #2ecc71; border: 1px solid #2ecc71; }
 
-  /* HP 바 */
+  /* HP/MP 바 */
   .hp-section { width: 100%; }
-  .hp-label {
-    display: flex;
-    justify-content: space-between;
-    font-size: 11px;
-    color: var(--muted);
-    margin-bottom: 4px;
+  .hp-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 3px; }
+  .hp-label .hp-num { font-weight: 700; color: white; font-size: 12px; }
+  .hp-track { width: 100%; height: 9px; background: rgba(255,255,255,0.07); border-radius: 5px; overflow: hidden; border: 1px solid rgba(255,255,255,0.04); }
+  .hp-fill { height: 100%; border-radius: 5px; transition: width 0.4s ease, background-color 0.4s; position: relative; overflow: hidden; }
+  /* 반짝이 효과 */
+  .hp-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -60%; width: 50%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: shimmer 2s ease-in-out infinite;
   }
-  .hp-label .hp-num { font-weight: 700; color: white; font-size: 13px; }
-  .hp-track {
-    width: 100%;
-    height: 10px;
-    background: rgba(255,255,255,0.08);
-    border-radius: 5px;
-    overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.05);
-  }
-  .hp-fill {
-    height: 100%;
-    border-radius: 5px;
-    transition: width 0.4s ease, background-color 0.4s;
-  }
+  @keyframes shimmer { 0% { left: -60%; } 100% { left: 120%; } }
 
-  /* MP 바 (마나) */
-  .mp-track {
-    width: 100%;
-    height: 5px;
-    background: rgba(255,255,255,0.05);
-    border-radius: 3px;
-    overflow: hidden;
-    margin-top: 4px;
-  }
-  .mp-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #4a9eff, #a44aff);
-    border-radius: 3px;
-    transition: width 0.4s;
-  }
+  .mp-track { width: 100%; height: 5px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; margin-top: 3px; }
+  .mp-fill { height: 100%; background: linear-gradient(90deg, #4a9eff, #a44aff); border-radius: 3px; transition: width 0.4s; }
   .mp-label { font-size: 10px; color: var(--muted); margin-top: 2px; }
 
-  /* VS 중앙 */
-  .vs-center {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-  }
-  .vs-text {
-    font-family: 'Cinzel', serif;
-    font-size: 22px;
-    color: var(--gold);
-    font-weight: 900;
-  }
-  #turnBadge {
-    font-size: 10px;
-    padding: 3px 8px;
-    background: rgba(240,192,96,0.1);
-    border: 1px solid rgba(240,192,96,0.3);
-    border-radius: 10px;
-    color: var(--gold);
-    text-align: center;
-    min-width: 60px;
-  }
+  /* EXP 바 */
+  .exp-track { width: 100%; height: 3px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden; margin-top: 3px; }
+  .exp-fill { height: 100%; background: linear-gradient(90deg, var(--gold), #ff9d4a); border-radius: 2px; transition: width 0.6s ease; }
+
+  /* VS */
+  .vs-center { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .vs-text { font-family: 'Cinzel', serif; font-size: 20px; color: var(--gold); font-weight: 900; }
+  #turnBadge { font-size: 10px; padding: 3px 8px; background: rgba(240,192,96,0.08); border: 1px solid rgba(240,192,96,0.25); border-radius: 10px; color: var(--gold); text-align: center; min-width: 60px; }
 
   /* 로그박스 */
   #logBox {
     background: var(--panel-bg);
     border: 1px solid var(--panel-border);
     border-radius: 10px;
-    height: 110px;
+    height: 100px;
     overflow-y: auto;
-    padding: 10px 14px;
-    font-size: 13px;
+    padding: 8px 12px;
+    font-size: 12px;
     line-height: 1.7;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
   }
-  #logBox::-webkit-scrollbar { width: 4px; }
-  #logBox::-webkit-scrollbar-track { background: transparent; }
+  #logBox::-webkit-scrollbar { width: 3px; }
   #logBox::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 2px; }
-  .log-entry { margin-bottom: 2px; }
+  .log-entry { margin-bottom: 1px; }
 
   /* 주문 버튼 */
   .spell-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    margin-bottom: 16px;
+    gap: 8px;
+    margin-bottom: 10px;
   }
 
   .spell-btn {
     background: var(--panel-bg);
     border: 1px solid var(--panel-border);
     border-radius: 10px;
-    padding: 12px 8px;
+    padding: 10px 6px;
     cursor: pointer;
     color: white;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     transition: all 0.2s;
     position: relative;
     overflow: hidden;
@@ -280,202 +270,253 @@
   }
   .spell-btn:hover:not(:disabled) { transform: translateY(-3px); }
   .spell-btn:hover:not(:disabled)::before { opacity: 1; }
-  .spell-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .spell-btn:disabled { opacity: 0.38; cursor: not-allowed; transform: none; }
 
   .spell-btn.s-expel::before { background: var(--harry-color); }
-  .spell-btn.s-expel:hover:not(:disabled) { border-color: var(--harry-color); box-shadow: 0 6px 20px rgba(74,158,255,0.2); }
+  .spell-btn.s-expel:hover:not(:disabled) { border-color: var(--harry-color); box-shadow: 0 6px 18px rgba(74,158,255,0.2); }
   .spell-btn.s-stupefy::before { background: var(--warn); }
-  .spell-btn.s-stupefy:hover:not(:disabled) { border-color: var(--warn); box-shadow: 0 6px 20px rgba(241,196,15,0.2); }
+  .spell-btn.s-stupefy:hover:not(:disabled) { border-color: var(--warn); box-shadow: 0 6px 18px rgba(241,196,15,0.2); }
   .spell-btn.s-protego::before { background: var(--success); }
-  .spell-btn.s-protego:hover:not(:disabled) { border-color: var(--success); box-shadow: 0 6px 20px rgba(46,204,113,0.2); }
+  .spell-btn.s-protego:hover:not(:disabled) { border-color: var(--success); box-shadow: 0 6px 18px rgba(46,204,113,0.2); }
   .spell-btn.s-avada::before { background: #8e44ad; }
-  .spell-btn.s-avada:hover:not(:disabled) { border-color: #8e44ad; box-shadow: 0 6px 20px rgba(142,68,173,0.3); }
+  .spell-btn.s-avada:hover:not(:disabled) { border-color: #8e44ad; box-shadow: 0 6px 18px rgba(142,68,173,0.3); }
+  .spell-btn.s-lumos::before { background: #fff176; }
+  .spell-btn.s-lumos:hover:not(:disabled) { border-color: #fff176; box-shadow: 0 6px 18px rgba(255,241,118,0.25); }
+  .spell-btn.s-incendio::before { background: #ff6b35; }
+  .spell-btn.s-incendio:hover:not(:disabled) { border-color: #ff6b35; box-shadow: 0 6px 18px rgba(255,107,53,0.25); }
 
-  .spell-icon-img {
-    width: 52px;
-    height: 52px;
-    object-fit: cover;
-    border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.1);
-  }
-  .spell-name { font-family: 'Cinzel', serif; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-align: center; }
-  .spell-desc { font-size: 10px; color: var(--muted); text-align: center; line-height: 1.3; }
-  .spell-cooldown {
-    position: absolute;
-    top: 4px; right: 6px;
-    font-size: 10px;
-    color: var(--warn);
-    font-weight: 700;
-  }
-  .spell-mp-cost {
-    position: absolute;
-    top: 4px; left: 6px;
-    font-size: 9px;
-    color: #7799ff;
-  }
+  .spell-icon-img { width: 46px; height: 46px; object-fit: cover; border-radius: 7px; border: 1px solid rgba(255,255,255,0.1); }
+  .spell-name { font-family: 'Cinzel', serif; font-size: 10px; font-weight: 700; letter-spacing: 0.4px; text-align: center; }
+  .spell-desc { font-size: 9px; color: var(--muted); text-align: center; line-height: 1.3; }
+  .spell-cooldown { position: absolute; top: 3px; right: 5px; font-size: 9px; color: var(--warn); font-weight: 700; }
+  .spell-mp-cost { position: absolute; top: 3px; left: 5px; font-size: 9px; color: #7799ff; }
 
-  /* 타이밍 오버레이 */
+  /* ════ 타이밍 오버레이 ════ */
   #timingOverlay {
     display: none;
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background: rgba(0,0,0,0.92);
+    background: rgba(0,0,0,0.95);
     z-index: 9999;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 20px;
-    backdrop-filter: blur(8px);
+    gap: 18px;
+    backdrop-filter: blur(10px);
   }
+
   .timing-title {
     font-family: 'Cinzel', serif;
-    font-size: 22px;
+    font-size: 20px;
     color: var(--gold);
     letter-spacing: 2px;
   }
-  .timing-hint { color: var(--muted); font-size: 12px; text-align: center; line-height: 1.8; }
+
+  /* 목표 시간 표시 */
+  .timing-target-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 10px 24px;
+  }
+  .target-time {
+    font-family: 'Cinzel', serif;
+    font-size: 36px;
+    font-weight: 900;
+    color: var(--gold);
+    text-shadow: 0 0 20px rgba(240,192,96,0.5);
+  }
+  .target-label { color: var(--muted); font-size: 12px; text-align: center; line-height: 1.6; }
+
+  /* 정밀도 범위 표시 */
+  .precision-hints {
+    display: flex;
+    gap: 16px;
+    font-size: 11px;
+  }
+  .ph { padding: 4px 12px; border-radius: 8px; text-align: center; }
+  .ph-crit { background: rgba(241,196,15,0.12); border: 1px solid var(--warn); color: var(--warn); }
+  .ph-norm { background: rgba(46,204,113,0.1); border: 1px solid var(--success); color: var(--success); }
+  .ph-miss { background: rgba(255,255,255,0.05); border: 1px solid var(--muted); color: var(--muted); }
+
   #stopwatchDisplay {
     font-family: 'Cinzel', monospace;
-    font-size: 90px;
+    font-size: 82px;
     font-weight: 900;
     color: white;
-    transition: color 0.1s;
-    text-shadow: 0 0 40px rgba(255,255,255,0.3);
+    transition: color 0.08s;
+    text-shadow: 0 0 40px rgba(255,255,255,0.2);
+    letter-spacing: -2px;
+    min-width: 260px;
+    text-align: center;
   }
+
+  /* 정밀 타이밍 바 */
   .timing-bar-wrap {
-    width: 300px;
-    height: 8px;
-    background: rgba(255,255,255,0.08);
-    border-radius: 4px;
-    overflow: hidden;
     position: relative;
+    width: 340px;
+    height: 16px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.08);
   }
-  .timing-target {
+  /* 크리티컬 존 (금색) */
+  .timing-zone-crit {
     position: absolute;
-    left: calc(5/7*100% - 15px);
-    width: 30px;
     height: 100%;
-    background: rgba(240,192,96,0.4);
+    background: rgba(241,196,15,0.35);
+    border-radius: 4px;
+  }
+  /* 노말 존 (녹색) */
+  .timing-zone-norm {
+    position: absolute;
+    height: 100%;
+    background: rgba(46,204,113,0.2);
     border-radius: 4px;
   }
   .timing-cursor {
+    position: absolute;
+    top: 0;
+    width: 3px;
     height: 100%;
-    width: 0%;
     background: white;
-    border-radius: 4px;
-    transition: width 0.01s linear;
+    border-radius: 2px;
+    box-shadow: 0 0 8px white;
+    transition: left 0.016s linear;
+    left: 0;
   }
+  /* 목표 마커 */
+  .timing-marker {
+    position: absolute;
+    top: -4px;
+    width: 2px;
+    height: calc(100% + 8px);
+    background: var(--gold);
+    border-radius: 1px;
+    box-shadow: 0 0 6px var(--gold);
+  }
+
   .stop-btn {
-    background: rgba(231,76,60,0.15);
+    background: rgba(231,76,60,0.12);
     border: 2px solid var(--danger);
     color: white;
     border-radius: 50%;
-    width: 120px;
-    height: 120px;
+    width: 110px;
+    height: 110px;
     font-family: 'Cinzel', serif;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 700;
     cursor: pointer;
-    transition: 0.15s;
+    transition: 0.12s;
     letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
   }
-  .stop-btn:active { transform: scale(0.9); background: rgba(231,76,60,0.4); }
-  .stop-btn:hover { background: rgba(231,76,60,0.25); }
+  .stop-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 0; height: 0;
+    background: rgba(231,76,60,0.3);
+    border-radius: 50%;
+    transform: translate(-50%,-50%);
+    transition: width 0.3s, height 0.3s;
+  }
+  .stop-btn:active::before { width: 200px; height: 200px; }
+  .stop-btn:hover { border-color: #ff6b5b; box-shadow: 0 0 20px rgba(231,76,60,0.3); }
 
-  /* 게임오버 오버레이 */
+  /* 결과 플래시 */
+  #resultFlash {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 10000;
+    opacity: 0;
+  }
+  #resultFlash.crit { background: rgba(241,196,15,0.15); animation: flashAnim 0.4s ease; }
+  #resultFlash.hit  { background: rgba(46,204,113,0.1); animation: flashAnim 0.4s ease; }
+  #resultFlash.miss { background: rgba(255,255,255,0.05); animation: flashAnim 0.3s ease; }
+  @keyframes flashAnim { 0% { opacity: 1; } 100% { opacity: 0; } }
+
+  /* 연속 도전 UI */
+  #streakDisplay {
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+  }
+  #streakDisplay span { color: var(--gold); font-weight: 700; }
+
+  /* 게임오버 */
   #gameoverOverlay {
     display: none;
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background: rgba(0,0,0,0.88);
+    background: rgba(0,0,0,0.9);
     z-index: 9998;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 20px;
-    backdrop-filter: blur(10px);
+    gap: 16px;
+    backdrop-filter: blur(12px);
   }
-  .gameover-title {
-    font-family: 'Cinzel', serif;
-    font-size: 42px;
-    font-weight: 900;
-    letter-spacing: 4px;
+  .gameover-title { font-family: 'Cinzel', serif; font-size: 38px; font-weight: 900; letter-spacing: 4px; }
+  .gameover-sub { color: var(--muted); font-size: 15px; letter-spacing: 1px; }
+  .gameover-stats {
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    padding: 16px 32px;
+    text-align: center;
+    line-height: 2;
+    font-size: 13px;
+    color: var(--muted);
   }
-  .gameover-sub { color: var(--muted); font-size: 16px; letter-spacing: 1px; }
+  .gameover-stats b { color: white; }
   .retry-btn {
     background: var(--panel-bg);
     border: 2px solid var(--gold);
     color: var(--gold);
     font-family: 'Cinzel', serif;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 700;
     letter-spacing: 2px;
-    padding: 14px 40px;
+    padding: 12px 36px;
     border-radius: 8px;
     cursor: pointer;
     transition: 0.2s;
-    margin-top: 10px;
+    margin-top: 6px;
   }
   .retry-btn:hover { background: rgba(240,192,96,0.1); transform: translateY(-2px); }
 
-  /* 애니메이션 */
-  @keyframes shake {
-    0%,100% { transform: translateX(0); }
-    15%      { transform: translateX(-8px) rotate(-1deg); }
-    30%      { transform: translateX(8px)  rotate(1deg); }
-    45%      { transform: translateX(-5px); }
-    60%      { transform: translateX(5px); }
-    75%      { transform: translateX(-2px); }
+  /* 레벨업 오버레이 */
+  #levelupOverlay {
+    display: none;
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--panel-bg);
+    border: 2px solid var(--gold);
+    border-radius: 16px;
+    padding: 24px 40px;
+    z-index: 9997;
+    text-align: center;
+    animation: levelupAnim 0.4s ease;
+    box-shadow: 0 0 60px rgba(240,192,96,0.3);
   }
-  @keyframes pulse-glow {
-    0%,100% { filter: drop-shadow(0 0 6px rgba(74,158,255,0.6)); }
-    50%      { filter: drop-shadow(0 0 18px rgba(74,158,255,1)); }
+  @keyframes levelupAnim {
+    0% { transform: translate(-50%,-50%) scale(0.5); opacity: 0; }
+    100% { transform: translate(-50%,-50%) scale(1); opacity: 1; }
   }
-  @keyframes float {
-    0%,100% { transform: translateY(0); }
-    50%      { transform: translateY(-6px); }
-  }
-  @keyframes cast-attack {
-    0%   { transform: translateX(0); }
-    30%  { transform: translateX(18px) scale(1.15); }
-    100% { transform: translateX(0)   scale(1); }
-  }
-  @keyframes cast-voldy {
-    0%   { transform: translateX(0); }
-    30%  { transform: translateX(-18px) scale(1.15); }
-    100% { transform: translateX(0)    scale(1); }
-  }
-  @keyframes hit-flash {
-    0%,100% { filter: brightness(1); }
-    50%      { filter: brightness(2) saturate(0.3); }
-  }
-  .hit-anim     { animation: shake 0.5s ease; }
-  .attack-anim  { animation: cast-attack 0.5s ease; }
-  .vatk-anim    { animation: cast-voldy 0.5s ease; }
-  .glow-anim    { animation: pulse-glow 0.6s ease; }
-  .flash-anim   { animation: hit-flash 0.4s ease; }
-  .float-anim   { animation: float 2s ease-in-out infinite; }
+  .levelup-title { font-family: 'Cinzel', serif; font-size: 22px; color: var(--gold); margin-bottom: 8px; }
+  .levelup-desc { color: white; font-size: 14px; }
 
-  /* 데미지 팝업 */
-  .dmg-popup {
-    position: absolute;
-    top: 10px;
-    font-family: 'Cinzel', serif;
-    font-size: 22px;
-    font-weight: 900;
-    pointer-events: none;
-    animation: dmgFloat 1.2s ease forwards;
-    z-index: 100;
-  }
-  @keyframes dmgFloat {
-    0%   { transform: translateY(0) scale(0.5); opacity: 1; }
-    60%  { transform: translateY(-50px) scale(1.2); opacity: 1; }
-    100% { transform: translateY(-80px) scale(1); opacity: 0; }
-  }
-
-  /* 볼드모트 사고중 */
+  /* 볼드모트 생각중 */
   #voldyThinking {
     font-size: 11px;
     color: var(--voldy-color);
@@ -486,37 +527,83 @@
   }
   #voldyThinking.visible { opacity: 1; }
 
-  /* 소리 설명 토스트 */
+  /* 소리 토스트 */
   #soundToast {
     position: fixed;
-    bottom: 30px;
+    bottom: 24px;
     left: 50%;
     transform: translateX(-50%) translateY(20px);
     background: var(--panel-bg);
     border: 1px solid var(--panel-border);
     border-radius: 8px;
-    padding: 12px 20px;
-    font-size: 13px;
+    padding: 10px 18px;
+    font-size: 12px;
     color: white;
     opacity: 0;
     transition: all 0.3s;
     z-index: 9999;
     pointer-events: none;
-    max-width: 320px;
+    max-width: 300px;
     text-align: center;
     line-height: 1.5;
   }
   #soundToast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  @media (max-width: 600px) {
-    .spell-grid { grid-template-columns: repeat(2, 1fr); }
-    #stopwatchDisplay { font-size: 60px; }
-    .gameover-title { font-size: 30px; }
-    .game-title { font-size: 24px; }
+  /* 애니메이션 */
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    15% { transform: translateX(-8px) rotate(-1deg); }
+    30% { transform: translateX(8px) rotate(1deg); }
+    45% { transform: translateX(-5px); }
+    60% { transform: translateX(5px); }
+    75% { transform: translateX(-2px); }
+  }
+  @keyframes cast-attack { 0% { transform: translateX(0); } 30% { transform: translateX(18px) scale(1.15); } 100% { transform: translateX(0) scale(1); } }
+  @keyframes cast-voldy  { 0% { transform: translateX(0); } 30% { transform: translateX(-18px) scale(1.15); } 100% { transform: translateX(0) scale(1); } }
+  @keyframes hit-flash   { 0%,100% { filter: brightness(1); } 50% { filter: brightness(2.5) saturate(0.2); } }
+  @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+  @keyframes levelGlow { 0%,100% { box-shadow: 0 0 10px rgba(240,192,96,0.3); } 50% { box-shadow: 0 0 30px rgba(240,192,96,0.7); } }
+
+  .hit-anim     { animation: shake 0.5s ease; }
+  .attack-anim  { animation: cast-attack 0.5s ease; }
+  .vatk-anim    { animation: cast-voldy 0.5s ease; }
+  .flash-anim   { animation: hit-flash 0.4s ease; }
+  .float-anim   { animation: float 2s ease-in-out infinite; }
+
+  /* 데미지 팝업 */
+  .dmg-popup {
+    position: absolute;
+    top: 10px;
+    font-family: 'Cinzel', serif;
+    font-size: 20px;
+    font-weight: 900;
+    pointer-events: none;
+    animation: dmgFloat 1.2s ease forwards;
+    z-index: 100;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+  }
+  @keyframes dmgFloat {
+    0% { transform: translateY(0) scale(0.5); opacity: 1; }
+    60% { transform: translateY(-50px) scale(1.2); opacity: 1; }
+    100% { transform: translateY(-80px) scale(1); opacity: 0; }
+  }
+
+  @media (max-width: 620px) {
+    .spell-grid { grid-template-columns: repeat(3, 1fr); }
+    #stopwatchDisplay { font-size: 56px; }
+    .gameover-title { font-size: 26px; }
+    .game-title { font-size: 22px; }
+    .timing-bar-wrap { width: 260px; }
+    .target-time { font-size: 28px; }
   }
 </style>
 </head>
 <body>
+
+<!-- 별빛 배경 -->
+<div class="stars" id="stars"></div>
+<div id="resultFlash"></div>
+
 <div class="wrapper">
 
   <div class="game-title">⚡ 해리포터 VS 볼드모트 ⚡</div>
@@ -528,8 +615,14 @@
       <div id="turnIndicator">👓 해리의 턴</div>
       <div class="turn-count" id="turnCount">턴 1</div>
     </div>
-    <div id="voldyThinking">🐍 볼드모트가 주문을 고르는 중...</div>
-    <button class="sound-btn" onclick="showSoundGuide()" title="배경음악/효과음 안내">🔊</button>
+    <div class="combo-area">
+      <div id="comboDisplay">🔥 COMBO x1</div>
+      <div id="voldyThinking">🐍 볼드모트가 주문을 고르는 중...</div>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <div id="streakDisplay">연속 크리: <span id="streakNum">0</span></div>
+      <button class="sound-btn" onclick="showSoundGuide()" title="안내">🔊</button>
+    </div>
   </div>
 
   <!-- 결투장 -->
@@ -538,18 +631,17 @@
     <!-- 해리 -->
     <div class="fighter-panel harry-panel active-turn" id="harryPanel">
       <div class="fighter-name">👓 HARRY POTTER</div>
+      <div class="level-badge" id="harryLvBadge">Lv.1</div>
       <div class="sprite-area float-anim" id="harrySprite">
         <img class="sprite-img" id="harryImg" src="harry_stand.jpg" alt="해리 포터">
       </div>
       <div class="status-badges" id="harryBadges"></div>
       <div class="hp-section">
-        <div class="hp-label">
-          <span>HP</span>
-          <span class="hp-num" id="harryHpNum">100 / 100</span>
-        </div>
-        <div class="hp-track"><div class="hp-fill" id="harryHpBar" style="width:100%; background:#2ecc71;"></div></div>
+        <div class="hp-label"><span>HP</span><span class="hp-num" id="harryHpNum">100 / 100</span></div>
+        <div class="hp-track"><div class="hp-fill" id="harryHpBar" style="width:100%;background:#2ecc71;"></div></div>
         <div class="mp-track"><div class="mp-fill" id="harryMpBar" style="width:100%;"></div></div>
         <div class="mp-label" id="harryMpLabel">MP: 100 / 100</div>
+        <div class="exp-track"><div class="exp-fill" id="harryExpBar" style="width:0%;"></div></div>
       </div>
     </div>
 
@@ -562,30 +654,29 @@
     <!-- 볼드모트 -->
     <div class="fighter-panel voldy-panel" id="voldyPanel">
       <div class="fighter-name">🐍 VOLDEMORT</div>
+      <div class="level-badge" id="voldyLvBadge">Lv.1</div>
       <div class="sprite-area float-anim" id="voldySprite" style="animation-delay:-1s;">
         <img class="sprite-img" id="voldyImg" src="voldy_stand.jpg" alt="볼드모트">
       </div>
       <div class="status-badges" id="voldyBadges"></div>
       <div class="hp-section">
-        <div class="hp-label">
-          <span>HP</span>
-          <span class="hp-num" id="voldyHpNum">150 / 150</span>
-        </div>
-        <div class="hp-track"><div class="hp-fill" id="voldyHpBar" style="width:100%; background:#2ecc71;"></div></div>
-        <div class="mp-track" style="background:rgba(180,74,255,0.15);">
-          <div class="mp-fill" id="voldyMpBar" style="width:100%; background:linear-gradient(90deg,#8e44ad,#b44aff);"></div>
+        <div class="hp-label"><span>HP</span><span class="hp-num" id="voldyHpNum">150 / 150</span></div>
+        <div class="hp-track"><div class="hp-fill" id="voldyHpBar" style="width:100%;background:#2ecc71;"></div></div>
+        <div class="mp-track" style="background:rgba(180,74,255,0.12);">
+          <div class="mp-fill" id="voldyMpBar" style="width:100%;background:linear-gradient(90deg,#8e44ad,#b44aff);"></div>
         </div>
         <div class="mp-label" id="voldyMpLabel">MP: 100 / 100</div>
+        <div class="exp-track"><div class="exp-fill" id="voldyExpBar" style="width:0%;"></div></div>
       </div>
     </div>
   </div>
 
-  <!-- 로그박스 -->
+  <!-- 로그 -->
   <div id="logBox">
-    <div class="log-entry" style="color:#f0c060;">⚡ 결투가 시작되었습니다! 주문을 선택하세요.</div>
+    <div class="log-entry" style="color:#f0c060;">⚡ 결투가 시작되었습니다! 타이밍을 맞춰 주문을 선택하세요.</div>
   </div>
 
-  <!-- 주문 버튼 -->
+  <!-- 주문 버튼 (6개) -->
   <div class="spell-grid" id="spellGrid">
     <button class="spell-btn s-expel" onclick="startTiming('익스펙토')">
       <span class="spell-mp-cost">20MP</span>
@@ -607,9 +698,21 @@
     </button>
     <button class="spell-btn s-avada" onclick="startTiming('아바다')" id="btnAvada">
       <span class="spell-mp-cost">50MP</span>
-      <span class="spell-icon-emoji" style="font-size:36px; line-height:1;">☠️</span>
+      <span style="font-size:32px;line-height:1;">☠️</span>
       <span class="spell-name">Avada Kedavra</span>
       <span class="spell-desc">피해 50<br>쿨타임 3턴</span>
+    </button>
+    <button class="spell-btn s-lumos" onclick="startTiming('루모스')" id="btnLumos">
+      <span class="spell-mp-cost">30MP</span>
+      <span style="font-size:32px;line-height:1;">💡</span>
+      <span class="spell-name">Lumos Maxima</span>
+      <span class="spell-desc">MP 전체 회복<br>쿨타임 4턴</span>
+    </button>
+    <button class="spell-btn s-incendio" onclick="startTiming('인센디오')" id="btnIncendio">
+      <span class="spell-mp-cost">35MP</span>
+      <span style="font-size:32px;line-height:1;">🔥</span>
+      <span class="spell-name">Incendio</span>
+      <span class="spell-desc">피해 30<br>화상 2턴</span>
     </button>
   </div>
 
@@ -617,193 +720,258 @@
 
 <!-- 타이밍 오버레이 -->
 <div id="timingOverlay">
-  <div class="timing-title" id="timingSpellName">Expelliarmus</div>
-  <div class="timing-hint">
-    정확히 <strong>5.00초</strong>에 멈추세요!<br>
-    ±0.30초 → 🔥 크리티컬 &nbsp;|&nbsp; ±0.80초 → ✅ 일반 &nbsp;|&nbsp; 그 외 → 💨 미스
+  <div class="timing-title" id="timingSpellName">✨ Expelliarmus</div>
+
+  <div class="timing-target-info">
+    <div>
+      <div style="color:var(--muted);font-size:10px;margin-bottom:2px;">목표 시간</div>
+      <div class="target-time" id="targetTimeDisplay">3.00</div>
+      <div style="color:var(--muted);font-size:9px;">초</div>
+    </div>
+    <div class="target-label">
+      정확히 멈추세요!<br>
+      <span style="color:var(--warn);">±0.20s → 크리티컬</span>
+    </div>
   </div>
+
+  <div class="precision-hints">
+    <div class="ph ph-crit">🔥 크리티컬 ±0.20s</div>
+    <div class="ph ph-norm">✅ 일반 ±0.50s</div>
+    <div class="ph ph-miss">💨 미스 그 외</div>
+  </div>
+
   <div id="stopwatchDisplay">0.00</div>
-  <div class="timing-bar-wrap">
-    <div class="timing-target"></div>
+
+  <div class="timing-bar-wrap" id="timingBarWrap">
+    <div class="timing-zone-norm" id="tzNorm"></div>
+    <div class="timing-zone-crit" id="tzCrit"></div>
+    <div class="timing-marker" id="tMarker"></div>
     <div class="timing-cursor" id="timingCursor"></div>
   </div>
+
   <button class="stop-btn" onclick="stopTiming()">STOP!</button>
 </div>
 
-<!-- 게임오버 오버레이 -->
+<!-- 레벨업 -->
+<div id="levelupOverlay">
+  <div class="levelup-title">⚡ LEVEL UP!</div>
+  <div class="levelup-desc" id="levelupDesc">레벨 2 달성!</div>
+</div>
+
+<!-- 게임오버 -->
 <div id="gameoverOverlay">
   <div class="gameover-title" id="gameoverTitle">게임 종료</div>
   <div class="gameover-sub" id="gameoverSub"></div>
+  <div class="gameover-stats" id="gameoverStats"></div>
   <button class="retry-btn" onclick="location.reload()">↺ 다시 도전</button>
 </div>
 
-<!-- 소리 토스트 -->
+<!-- 토스트 -->
 <div id="soundToast"></div>
 
 <script>
+// ─── 별 배경 생성 ────────────────────────────────────────────────────────────
+(function createStars() {
+  const container = document.getElementById('stars');
+  for (let i = 0; i < 80; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2 + 0.5;
+    s.style.cssText = `
+      width:${size}px; height:${size}px;
+      top:${Math.random()*100}%;
+      left:${Math.random()*100}%;
+      animation-duration:${2+Math.random()*4}s;
+      animation-delay:${Math.random()*4}s;
+    `;
+    container.appendChild(s);
+  }
+})();
+
 // ─── 게임 상태 ───────────────────────────────────────────────────────────────
 const HARRY_MAX_HP = 100, VOLDY_MAX_HP = 150;
 const HARRY_MAX_MP = 100, VOLDY_MAX_MP = 100;
 
+// 레벨 시스템
+const LEVEL_EXP = [0, 0, 30, 70, 120, 180]; // [레벨1부터 필요 exp]
+const LEVEL_BONUS = {
+  2: { hp: 20, mp: 20, desc: 'HP+20, MP+20 보너스!' },
+  3: { hp: 15, mp: 15, desc: 'HP+15, MP+15, 공격력 10% 증가!' },
+  4: { hp: 10, mp: 20, desc: 'HP+10, MP+20, 크리티컬 범위 확장!' },
+  5: { hp: 25, mp: 25, desc: 'HP+25, MP+25, 최강 마법사 해금!' },
+};
+
 let state = {
-  harryHP: HARRY_MAX_HP, harryMP: HARRY_MAX_MP,
-  voldyHP: VOLDY_MAX_HP, voldyMP: VOLDY_MAX_MP,
-  turn: 1,         // 1=해리, 2=볼드모트
+  harryHP: HARRY_MAX_HP, harryMaxHP: HARRY_MAX_HP,
+  harryMP: HARRY_MAX_MP, harryMaxMP: HARRY_MAX_MP,
+  voldyHP: VOLDY_MAX_HP, voldyMaxHP: VOLDY_MAX_HP,
+  voldyMP: VOLDY_MAX_MP, voldyMaxMP: VOLDY_MAX_MP,
+  turn: 1,
   turnCount: 1,
   isOver: false,
   avadaCooldown: 0,
-  voldyPoison: 0,   // 해리에게 걸린 독 (크루시오)
+  lumosCooldown: 0,
+  incendioCooldown: 0,
+  voldyPoison: 0,     // 크루시오 독
+  harryBurn: 0,       // 인센디오 화상 (볼드모트에게)
+  voldyBurn: 0,       // 볼드모트에게 건 화상
   harryShield: false,
   harryStunned: false,
   voldyStunned: false,
+  harryRegen: 0,      // 재생 턴 수
+  // 레벨 시스템
+  harryLevel: 1,
+  harryExp: 0,
+  voldyLevel: 1,
+  voldyExp: 0,
+  // 콤보 시스템
+  critCombo: 0,
+  consecutiveCrit: 0,
+  totalCrits: 0,
+  totalHits: 0,
+  totalMisses: 0,
+  turnsPassed: 0,
+  // 공격력 배율
+  harryAtkMult: 1.0,
+  critRangeBonus: 0, // 크리티컬 범위 확장 (초)
 };
 
-// ─── Web Audio (효과음 생성) ─────────────────────────────────────────────────
+// ─── 타이밍 설정 ─────────────────────────────────────────────────────────────
+const CRIT_RANGE = 0.20;   // ±0.20초 = 크리티컬
+const NORM_RANGE = 0.50;   // ±0.50초 = 일반
+const TARGET_CHOICES = [1.00, 1.50, 2.00, 2.50, 3.00, 3.50, 4.00, 4.50, 5.00];
+const BAR_DURATION = 8.0;  // 바 전체 시간
+
+let targetTime = 3.00;
+let startTime = 0, timerInterval = null, pendingSpell = "";
+
+// ─── Web Audio ───────────────────────────────────────────────────────────────
 let audioCtx = null;
 function getAudioCtx() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   return audioCtx;
 }
-
-function playTone(frequency, type, duration, volume=0.3, startDelay=0) {
+function playTone(freq, type, dur, vol=0.25, delay=0) {
   try {
     const ctx = getAudioCtx();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.type = type;
-    osc.frequency.setValueAtTime(frequency, ctx.currentTime + startDelay);
-    gain.gain.setValueAtTime(volume, ctx.currentTime + startDelay);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startDelay + duration);
-    osc.start(ctx.currentTime + startDelay);
-    osc.stop(ctx.currentTime + startDelay + duration);
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol, ctx.currentTime + delay);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + dur);
+    o.start(ctx.currentTime + delay); o.stop(ctx.currentTime + delay + dur);
   } catch(e) {}
 }
 
-function playChord(notes, type, duration, volume=0.15) {
-  notes.forEach(f => playTone(f, type, duration, volume));
-}
-
-// 효과음 종류
 const SFX = {
-  cast:      () => { playTone(660, 'square', 0.08, 0.2); playTone(880, 'sine', 0.15, 0.15, 0.05); },
-  critical:  () => { [523,659,784,1047].forEach((f,i) => playTone(f,'sine',0.2,0.2,i*0.05)); },
-  miss:      () => { playTone(200, 'sawtooth', 0.3, 0.2); },
-  hit:       () => { playTone(150, 'square', 0.1, 0.3); playTone(100, 'sine', 0.2, 0.2, 0.05); },
-  heal:      () => { [523,659,784].forEach((f,i) => playTone(f,'sine',0.25,0.15,i*0.07)); },
-  avada:     () => { for(let i=0;i<5;i++) playTone(80+i*20,'sawtooth',0.4,0.15,i*0.03); },
-  stupefy:   () => { playTone(440,'square',0.08,0.25); playTone(220,'sine',0.3,0.2,0.08); },
-  shield:    () => { [392,494,587].forEach((f,i) => playTone(f,'sine',0.3,0.1,i*0.06)); },
-  voldy:     () => { playTone(120,'sawtooth',0.15,0.3); playTone(80,'square',0.3,0.2,0.1); },
-  tick:      () => playTone(1200,'sine',0.04,0.05),
-  beep:      () => { playTone(880,'sine',0.05,0.1); playTone(1100,'sine',0.08,0.1,0.05); },
-  win:       () => { [523,659,784,1047,1319].forEach((f,i)=>playTone(f,'sine',0.4,0.2,i*0.1)); },
-  lose:      () => { [392,330,262,196].forEach((f,i)=>playTone(f,'sawtooth',0.5,0.2,i*0.15)); },
-  timing_in: () => playTone(660,'sine',0.05,0.15),
-  poison:    () => { playTone(200,'sawtooth',0.08,0.15); playTone(160,'sawtooth',0.1,0.15,0.08); },
+  cast:     () => { playTone(660,'square',0.07,0.18); playTone(880,'sine',0.14,0.14,0.05); },
+  critical: () => { [523,659,784,1047,1319].forEach((f,i)=>playTone(f,'sine',0.22,0.18,i*0.04)); },
+  miss:     () => { playTone(200,'sawtooth',0.28,0.18); },
+  hit:      () => { playTone(150,'square',0.1,0.28); playTone(100,'sine',0.2,0.18,0.05); },
+  heal:     () => { [523,659,784].forEach((f,i)=>playTone(f,'sine',0.24,0.14,i*0.07)); },
+  avada:    () => { for(let i=0;i<5;i++) playTone(80+i*20,'sawtooth',0.4,0.14,i*0.03); },
+  stupefy:  () => { playTone(440,'square',0.07,0.22); playTone(220,'sine',0.28,0.18,0.07); },
+  shield:   () => { [392,494,587].forEach((f,i)=>playTone(f,'sine',0.28,0.1,i*0.06)); },
+  voldy:    () => { playTone(120,'sawtooth',0.14,0.28); playTone(80,'square',0.28,0.18,0.1); },
+  tick:     () => playTone(1200,'sine',0.04,0.05),
+  beep:     () => { playTone(880,'sine',0.05,0.1); playTone(1100,'sine',0.07,0.1,0.04); },
+  win:      () => { [523,659,784,1047,1319,1568].forEach((f,i)=>playTone(f,'sine',0.5,0.2,i*0.1)); },
+  lose:     () => { [392,330,262,196,131].forEach((f,i)=>playTone(f,'sawtooth',0.5,0.2,i*0.15)); },
+  levelup:  () => { [523,784,1047,1319].forEach((f,i)=>playTone(f,'sine',0.35,0.2,i*0.08)); playTone(1568,'sine',0.5,0.25,0.35); },
+  burn:     () => { playTone(300,'sawtooth',0.1,0.2); playTone(180,'sawtooth',0.12,0.2,0.08); },
+  poison:   () => { playTone(200,'sawtooth',0.08,0.14); playTone(160,'sawtooth',0.1,0.14,0.08); },
+  combo:    () => { playTone(880,'sine',0.06,0.2); playTone(1320,'sine',0.08,0.2,0.04); },
+  lumos:    () => { [659,784,1047,1319].forEach((f,i)=>playTone(f,'sine',0.3,0.18,i*0.06)); },
+  incendio: () => { for(let i=0;i<4;i++) playTone(200+i*80,'sawtooth',0.3,0.16,i*0.04); },
+  timing_crit: () => playTone(1400,'sine',0.05,0.18),
+  timing_norm: () => playTone(1000,'sine',0.04,0.12),
 };
 
-// 배경음악 (루프)
-let bgNodes = [];
+// BGM — bgm.mp3
+const bgmAudio = new Audio('bgm.mp3');
+bgmAudio.loop = true;
+bgmAudio.volume = 0.5;
 let bgPlaying = false;
-let bgEnabled = true;
 
 function playBGM() {
-  if (!bgEnabled || bgPlaying) return;
-  bgPlaying = true;
-  const ctx = getAudioCtx();
-
-  // 분위기 있는 드론 베이스
-  const notes = [55, 73.4, 82.4, 110];
-  notes.forEach((f, i) => {
-    try {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = f;
-      gain.gain.value = 0.04 - i * 0.008;
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      bgNodes.push(osc, gain);
-    } catch(e) {}
-  });
-
-  // 리버브 느낌의 반복 하이 노트
-  let beat = 0;
-  const melody = [440, 392, 349, 392, 523, 392, 349, 330];
-  function nextNote() {
-    if (!bgEnabled) return;
-    try {
-      const ctx2 = getAudioCtx();
-      const osc = ctx2.createOscillator();
-      const gain = ctx2.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = melody[beat % melody.length];
-      gain.gain.setValueAtTime(0.07, ctx2.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx2.currentTime + 1.2);
-      osc.connect(gain);
-      gain.connect(ctx2.destination);
-      osc.start();
-      osc.stop(ctx2.currentTime + 1.2);
-      beat++;
-    } catch(e) {}
-    bgTimer = setTimeout(nextNote, 1400);
-  }
-  bgTimer = setTimeout(nextNote, 800);
+  if (bgPlaying) return;
+  bgmAudio.play().then(() => { bgPlaying = true; }).catch(() => {});
 }
-
-let bgTimer = null;
-
 function stopBGM() {
+  bgmAudio.pause();
+  bgmAudio.currentTime = 0;
   bgPlaying = false;
-  bgEnabled = false;
-  bgNodes.forEach(n => { try { n.stop && n.stop(); } catch(e){} });
-  bgNodes = [];
-  clearTimeout(bgTimer);
 }
 
-// ─── 타이밍 관련 ─────────────────────────────────────────────────────────────
-let startTime = 0, timerInterval = null, pendingSpell = "";
-
+// ─── 타이밍 시작 ─────────────────────────────────────────────────────────────
 function startTiming(spell) {
   if (state.turn !== 1 || state.isOver) return;
   if (spell === '아바다' && state.avadaCooldown > 0) return;
+  if (spell === '루모스' && state.lumosCooldown > 0) return;
+  if (spell === '인센디오' && state.incendioCooldown > 0) return;
 
-  // MP 체크
-  const cost = {익스펙토:20, 스투페파이:25, 프로테고:15, 아바다:50}[spell];
+  const cost = {익스펙토:20, 스투페파이:25, 프로테고:15, 아바다:50, 루모스:30, 인센디오:35}[spell];
   if (state.harryMP < cost) {
-    addLog(`💬 MP가 부족합니다! (필요: ${cost}MP, 현재: ${state.harryMP}MP)`, '#e74c3c');
+    addLog(`💬 MP 부족! (필요: ${cost}MP, 현재: ${state.harryMP}MP)`, '#e74c3c');
     return;
   }
 
   pendingSpell = spell;
-  const spellNames = {익스펙토:'Expelliarmus',스투페파이:'Stupefy',프로테고:'Protego',아바다:'Avada Kedavra'};
+
+  // 랜덤 목표 시간 선택
+  targetTime = TARGET_CHOICES[Math.floor(Math.random() * TARGET_CHOICES.length)];
+  // 레벨 4+ 크리티컬 범위 확장
+  const critR = CRIT_RANGE + state.critRangeBonus;
+  const normR = NORM_RANGE;
+
+  const spellNames = {
+    익스펙토:'Expelliarmus', 스투페파이:'Stupefy', 프로테고:'Protego',
+    아바다:'Avada Kedavra', 루모스:'Lumos Maxima', 인센디오:'Incendio'
+  };
   document.getElementById('timingSpellName').textContent = '✨ ' + spellNames[spell];
+  document.getElementById('targetTimeDisplay').textContent = targetTime.toFixed(2);
+
+  // 바 존 계산
+  const barW = document.getElementById('timingBarWrap').offsetWidth;
+  const ratio = targetTime / BAR_DURATION;
+  const markerPx = ratio * barW;
+
+  document.getElementById('tMarker').style.left = (markerPx - 1) + 'px';
+  document.getElementById('tzNorm').style.left = ((targetTime - normR) / BAR_DURATION * 100) + '%';
+  document.getElementById('tzNorm').style.width = (normR * 2 / BAR_DURATION * 100) + '%';
+  document.getElementById('tzCrit').style.left = ((targetTime - critR) / BAR_DURATION * 100) + '%';
+  document.getElementById('tzCrit').style.width = (critR * 2 / BAR_DURATION * 100) + '%';
+
   document.getElementById('timingOverlay').style.display = 'flex';
   document.getElementById('stopwatchDisplay').style.color = 'white';
-  document.getElementById('timingCursor').style.width = '0%';
+  document.getElementById('timingCursor').style.left = '0px';
 
   SFX.cast();
   startTime = Date.now();
 
   timerInterval = setInterval(() => {
     const elapsed = (Date.now() - startTime) / 1000;
-    document.getElementById('stopwatchDisplay').innerText = elapsed.toFixed(2);
-    document.getElementById('timingCursor').style.width = Math.min(elapsed / 7 * 100, 100) + '%';
+    document.getElementById('stopwatchDisplay').textContent = elapsed.toFixed(2);
 
-    const diff = Math.abs(5.00 - elapsed);
-    if (diff <= 0.30) {
+    // 커서 이동
+    const pct = Math.min(elapsed / BAR_DURATION, 1);
+    const bw = document.getElementById('timingBarWrap').offsetWidth;
+    document.getElementById('timingCursor').style.left = (pct * bw - 1.5) + 'px';
+
+    // 색상 피드백
+    const diff = Math.abs(targetTime - elapsed);
+    const critR2 = CRIT_RANGE + state.critRangeBonus;
+    if (diff <= critR2) {
       document.getElementById('stopwatchDisplay').style.color = '#f1c40f';
-      SFX.timing_in();
-    } else if (diff <= 0.80) {
+      SFX.timing_crit();
+    } else if (diff <= NORM_RANGE) {
       document.getElementById('stopwatchDisplay').style.color = '#2ecc71';
+      SFX.timing_norm();
     } else {
       document.getElementById('stopwatchDisplay').style.color = 'white';
     }
 
-    if (elapsed >= 7.5) stopTiming();
+    if (elapsed >= BAR_DURATION + 0.5) stopTiming();
   }, 16);
 }
 
@@ -812,80 +980,133 @@ function stopTiming() {
   document.getElementById('timingOverlay').style.display = 'none';
 
   const stopped = (Date.now() - startTime) / 1000;
-  const diff = Math.abs(5.00 - stopped);
+  const diff = Math.abs(targetTime - stopped);
+  const critR = CRIT_RANGE + state.critRangeBonus;
 
   let hitType;
-  if (diff <= 0.30)      { hitType = 'critical'; SFX.critical(); }
-  else if (diff <= 0.80) { hitType = 'normal';   SFX.beep(); }
-  else                   { hitType = 'miss';      SFX.miss(); }
+  if (diff <= critR)      { hitType = 'critical'; SFX.critical(); flashScreen('crit'); state.consecutiveCrit++; state.totalCrits++; }
+  else if (diff <= NORM_RANGE) { hitType = 'normal'; SFX.beep(); flashScreen('hit'); state.consecutiveCrit = 0; state.totalHits++; }
+  else                         { hitType = 'miss'; SFX.miss(); flashScreen('miss'); state.consecutiveCrit = 0; state.totalMisses++; }
 
-  addLog(`⏱ 멈춘 시간: ${stopped.toFixed(2)}초 (오차 ${diff.toFixed(2)}초)`, '#8899aa');
-  executeSpell(pendingSpell, hitType);
+  // 콤보 시스템
+  if (hitType === 'critical') {
+    state.critCombo++;
+    if (state.critCombo >= 2) {
+      SFX.combo();
+      document.getElementById('comboDisplay').textContent = `🔥 COMBO x${state.critCombo}`;
+      document.getElementById('comboDisplay').classList.add('show');
+    }
+  } else {
+    state.critCombo = 0;
+    document.getElementById('comboDisplay').classList.remove('show');
+  }
+
+  // 콤보 배율 (크리티컬 연속 시 추가 데미지)
+  const comboMult = hitType === 'critical' && state.critCombo >= 2 ? (1 + (state.critCombo - 1) * 0.1) : 1.0;
+
+  addLog(`⏱ 멈춘 시간: ${stopped.toFixed(2)}s | 목표: ${targetTime.toFixed(2)}s | 오차: ${diff.toFixed(2)}s`, '#8899aa');
+  executeSpell(pendingSpell, hitType, comboMult);
+}
+
+function flashScreen(type) {
+  const el = document.getElementById('resultFlash');
+  el.className = type;
+  setTimeout(() => el.className = '', 500);
 }
 
 // ─── 주문 실행 ───────────────────────────────────────────────────────────────
-function executeSpell(spell, hitType) {
-  const mult   = hitType === 'critical' ? 1.5 : hitType === 'miss' ? 0 : 1.0;
-  const prefix = hitType === 'critical' ? '🔥[크리티컬!] ' : hitType === 'miss' ? '💨[미스] ' : '';
-  const logClr = hitType === 'critical' ? '#f1c40f' : hitType === 'miss' ? '#8899aa' : '#4a9eff';
-  const cost   = {익스펙토:20, 스투페파이:25, 프로테고:15, 아바다:50}[spell];
+function executeSpell(spell, hitType, comboMult = 1.0) {
+  const isCrit = hitType === 'critical';
+  const isMiss = hitType === 'miss';
+  const mult   = isCrit ? 1.5 * comboMult : isMiss ? 0 : 1.0 * comboMult;
+  const atkMult = state.harryAtkMult;
+  const prefix = isCrit ? `🔥[크리티컬${comboMult > 1 ? ' x'+comboMult.toFixed(1) : ''}!] ` : isMiss ? '💨[미스] ' : '';
+  const logClr = isCrit ? '#f1c40f' : isMiss ? '#8899aa' : '#4a9eff';
+  const cost   = {익스펙토:20, 스투페파이:25, 프로테고:15, 아바다:50, 루모스:30, 인센디오:35}[spell];
 
-  // MP 소모
   state.harryMP = Math.max(0, state.harryMP - cost);
 
-  // 독 데미지 처리
+  // 독/화상 처리
   if (state.voldyPoison > 0) {
-    const poisonDmg = state.harryShield ? 0 : 5;
-    if (!state.harryShield) {
-      state.harryHP -= poisonDmg;
-      addLog(`☠️ 크루시오 잔여 효과 — 해리 -${poisonDmg}HP (남은 독: ${state.voldyPoison-1}턴)`, '#b44aff');
-      SFX.poison();
-      animHit('harry');
-    } else {
-      addLog(`🛡️ 방어막이 독을 흡수했습니다!`, '#4a9eff');
-    }
+    const pd = state.harryShield ? 0 : 5;
+    if (!state.harryShield) { state.harryHP -= pd; addLog(`☠️ 크루시오 독 -${pd}HP (${state.voldyPoison-1}턴 남음)`, '#b44aff'); SFX.poison(); animHit('harry'); }
+    else { addLog(`🛡️ 방어막이 독을 흡수!`, '#4a9eff'); }
     state.voldyPoison--;
+  }
+  if (state.voldyBurn > 0 && !isMiss) {
+    const bd = state.harryShield ? 2 : 8;
+    state.voldyHP -= bd;
+    addLog(`🔥 화상 효과 볼드모트 -${bd}HP (${state.voldyBurn-1}턴 남음)`, '#ff6b35');
+    SFX.burn(); animHit('voldy');
+    state.voldyBurn--;
+  }
+
+  // 재생 효과
+  if (state.harryRegen > 0) {
+    const rg = 8;
+    state.harryHP = Math.min(state.harryMaxHP, state.harryHP + rg);
+    addLog(`💚 재생 +${rg}HP (${state.harryRegen-1}턴 남음)`, '#2ecc71');
+    state.harryRegen--;
   }
 
   state.harryShield = false;
-
-  // 애니메이션
   animAttack('harry');
 
   // 주문별 처리
   if (spell === '익스펙토') {
-    const dmg = Math.round(25 * mult);
+    const dmg = Math.round(25 * mult * atkMult);
     addLog(`⚡ 해리: Expelliarmus! ${prefix}→ 볼드모트 -${dmg}HP`, logClr);
-    if (mult > 0) { state.voldyHP -= dmg; animHit('voldy'); showDmgPopup('voldy', dmg, hitType); SFX.hit(); }
+    if (mult > 0) { state.voldyHP -= dmg; animHit('voldy'); showDmgPopup('voldy', dmg, hitType); SFX.hit(); gainExp('harry', 10 + (isCrit?10:0)); }
     state.turn = 2;
-  }
-  else if (spell === '스투페파이') {
-    const dmg = Math.round(18 * mult);
-    addLog(`🌀 해리: Stupefy! ${prefix}→ 볼드모트 -${dmg}HP${mult > 0 ? ', 턴 스킵!' : ''}`, logClr);
-    if (mult > 0) { state.voldyHP -= dmg; animHit('voldy'); showDmgPopup('voldy', dmg, hitType); SFX.stupefy(); state.turn = 1; }
-    else { state.turn = 2; }
-  }
-  else if (spell === '프로테고') {
+  } else if (spell === '스투페파이') {
+    const dmg = Math.round(18 * mult * atkMult);
+    addLog(`🌀 해리: Stupefy! ${prefix}→ 볼드모트 -${dmg}HP${mult>0?', 턴 스킵!':''}`, logClr);
+    if (mult > 0) { state.voldyHP -= dmg; animHit('voldy'); showDmgPopup('voldy', dmg, hitType); SFX.stupefy(); state.voldyStunned = true; gainExp('harry', 12 + (isCrit?12:0)); state.turn = 1; }
+    else state.turn = 2;
+  } else if (spell === '프로테고') {
     const heal = Math.round(20 * mult);
-    addLog(`🛡️ 해리: Protego! ${prefix}→ HP +${heal}, 방어막 1턴 획득`, hitType !== 'miss' ? '#2ecc71' : '#8899aa');
-    if (mult > 0) { state.harryHP = Math.min(HARRY_MAX_HP, state.harryHP + heal); state.harryShield = true; SFX.heal(); SFX.shield(); showHealPopup('harry', heal); }
+    addLog(`🛡️ 해리: Protego! ${prefix}→ HP +${heal}, 방어막 + 재생 1턴`, isMiss ? '#8899aa' : '#2ecc71');
+    if (mult > 0) {
+      state.harryHP = Math.min(state.harryMaxHP, state.harryHP + heal);
+      state.harryShield = true;
+      if (isCrit) { state.harryRegen = 2; addLog(`✨ [크리티컬] 재생 효과 2턴 추가!`, '#f1c40f'); }
+      SFX.heal(); SFX.shield(); showHealPopup('harry', heal);
+      gainExp('harry', 8 + (isCrit?8:0));
+    }
     state.turn = 2;
-  }
-  else if (spell === '아바다') {
-    const dmg = Math.round(50 * mult);
-    addLog(`☠️ 해리: Avada Kedavra!!! ${prefix}→ 볼드모트 -${dmg}HP`, hitType === 'miss' ? '#8899aa' : '#9b59b6');
-    if (mult > 0) { state.voldyHP -= dmg; animHit('voldy'); showDmgPopup('voldy', dmg, hitType); SFX.avada(); }
-    state.avadaCooldown = 3;
-    state.turn = 2;
+  } else if (spell === '아바다') {
+    const dmg = Math.round(50 * mult * atkMult);
+    addLog(`☠️ 해리: Avada Kedavra!!! ${prefix}→ 볼드모트 -${dmg}HP`, isMiss ? '#8899aa' : '#9b59b6');
+    if (mult > 0) { state.voldyHP -= dmg; animHit('voldy'); showDmgPopup('voldy', dmg, hitType); SFX.avada(); gainExp('harry', 20 + (isCrit?20:0)); }
+    state.avadaCooldown = 3; state.turn = 2;
+  } else if (spell === '루모스') {
+    const mpRestore = Math.round(60 * (isCrit ? 1.5 : isMiss ? 0.3 : 1.0));
+    addLog(`💡 해리: Lumos Maxima! ${prefix}→ MP +${mpRestore} 회복`, isMiss ? '#8899aa' : '#fff176');
+    state.harryMP = Math.min(state.harryMaxMP, state.harryMP + mpRestore);
+    if (isCrit) { state.harryHP = Math.min(state.harryMaxHP, state.harryHP + 15); addLog(`✨ [크리티컬] HP +15 보너스!`, '#f1c40f'); showHealPopup('harry', 15); }
+    SFX.lumos(); gainExp('harry', 10);
+    state.lumosCooldown = 4; state.turn = 2;
+  } else if (spell === '인센디오') {
+    const dmg = Math.round(30 * mult * atkMult);
+    addLog(`🔥 해리: Incendio! ${prefix}→ 볼드모트 -${dmg}HP${mult>0?', 화상 2턴!':''}`, isMiss ? '#8899aa' : '#ff6b35');
+    if (mult > 0) {
+      state.voldyHP -= dmg; animHit('voldy'); showDmgPopup('voldy', dmg, hitType); SFX.incendio();
+      state.voldyBurn = isCrit ? 3 : 2;
+      gainExp('harry', 15 + (isCrit?15:0));
+    }
+    state.incendioCooldown = 3; state.turn = 2;
   }
 
-  // 쿨다운 감소 (아바다 제외)
+  // 쿨다운 감소
   if (state.avadaCooldown > 0 && spell !== '아바다') state.avadaCooldown--;
+  if (state.lumosCooldown > 0 && spell !== '루모스') state.lumosCooldown--;
+  if (state.incendioCooldown > 0 && spell !== '인센디오') state.incendioCooldown--;
 
-  // MP 턴마다 소량 회복
-  state.harryMP = Math.min(HARRY_MAX_MP, state.harryMP + 5);
+  // MP 자연 회복
+  state.harryMP = Math.min(state.harryMaxMP, state.harryMP + 5);
 
   state.turnCount++;
+  state.turnsPassed++;
   clampHP();
   updateUI();
   if (checkGameOver()) return;
@@ -904,6 +1125,38 @@ function executeSpell(spell, hitType) {
   }
 }
 
+// ─── 경험치 / 레벨업 ─────────────────────────────────────────────────────────
+function gainExp(who, amount) {
+  if (who !== 'harry') return;
+  if (state.harryLevel >= 5) return;
+
+  state.harryExp += amount;
+  const needed = LEVEL_EXP[state.harryLevel + 1] || 999;
+  if (state.harryExp >= needed) {
+    state.harryExp -= needed;
+    state.harryLevel++;
+    const bonus = LEVEL_BONUS[state.harryLevel];
+    if (bonus) {
+      state.harryMaxHP += bonus.hp;
+      state.harryHP = Math.min(state.harryMaxHP, state.harryHP + bonus.hp);
+      state.harryMaxMP += bonus.mp;
+      state.harryMP = Math.min(state.harryMaxMP, state.harryMP + bonus.mp);
+      if (state.harryLevel >= 3) state.harryAtkMult = 1.10;
+      if (state.harryLevel >= 4) state.critRangeBonus = 0.05;
+      showLevelup(`Lv.${state.harryLevel} 달성! ${bonus.desc}`);
+    }
+    SFX.levelup();
+    updateUI();
+  }
+}
+
+function showLevelup(desc) {
+  const ov = document.getElementById('levelupOverlay');
+  document.getElementById('levelupDesc').textContent = desc;
+  ov.style.display = 'block';
+  setTimeout(() => { ov.style.display = 'none'; }, 2500);
+}
+
 // ─── 볼드모트 AI ─────────────────────────────────────────────────────────────
 function voldemortTurn() {
   if (state.isOver) return;
@@ -912,103 +1165,100 @@ function voldemortTurn() {
   if (state.voldyStunned) {
     addLog('🌀 볼드모트가 Stupefy에 의해 행동 불능!', '#f1c40f');
     state.voldyStunned = false;
-    endVoldyTurn();
-    return;
+    // 볼드모트도 경험치 획득
+    gainVoldyExp(15);
+    endVoldyTurn(); return;
   }
 
-  // MP 회복
-  state.voldyMP = Math.min(VOLDY_MAX_MP, state.voldyMP + 8);
+  state.voldyMP = Math.min(state.voldyMaxMP, state.voldyMP + 8);
+
+  // 볼드모트도 레벨업
+  gainVoldyExp(8);
 
   animAttack('voldy');
   SFX.voldy();
 
-  // 볼드모트 AI: HP/상황에 따라 전략적으로 행동
-  const hpRatio = state.voldyHP / VOLDY_MAX_HP;
-  let roll = Math.random();
+  const hpR = state.voldyHP / state.voldyMaxHP;
+  const roll = Math.random();
 
-  if (hpRatio < 0.25) {
-    // 피 부족 → 강한 공격 70%, 독 20%, 임페리오 10%
-    if (roll < 0.70)      voldyAvada();
-    else if (roll < 0.90) voldyCrucio();
-    else                  voldyImperio();
-  } else if (hpRatio < 0.50) {
-    // 중간 HP → 고른 전략
-    if (roll < 0.35)      voldyAvada();
+  if (hpR < 0.25) {
+    if (roll < 0.65) voldyAvada();
+    else if (roll < 0.85) voldyCrucio();
+    else voldyImperio();
+  } else if (hpR < 0.55) {
+    if (roll < 0.30) voldyAvada();
     else if (roll < 0.65) voldyCrucio();
-    else                  voldyImperio();
+    else voldyImperio();
   } else {
-    // HP 풍부 → 독으로 견제
-    if (roll < 0.20)      voldyAvada();
-    else if (roll < 0.70) voldyCrucio();
-    else                  voldyImperio();
+    if (roll < 0.15) voldyAvada();
+    else if (roll < 0.65) voldyCrucio();
+    else voldyImperio();
   }
 
-  // MP 소모
   state.voldyMP = Math.max(0, state.voldyMP - 20);
   clampHP();
   updateUI();
   if (checkGameOver()) return;
-
   endVoldyTurn();
 }
 
-function voldyAvada() {
-  const dmg = state.harryShield ? Math.round(35 * 0.3) : 35;
-  const shieldTxt = state.harryShield ? ' (방어막으로 경감!)' : '';
-  addLog(`🐍 볼드모트: Avada Kedavra! → 해리 -${dmg}HP${shieldTxt}`, '#e74c3c');
-  state.harryHP -= dmg;
-  state.harryShield = false;
-  animHit('harry');
-  showDmgPopup('harry', dmg, 'normal');
-  SFX.hit();
-}
-
-function voldyCrucio() {
-  if (state.voldyPoison > 0) {
-    // 독이 이미 있으면 강공격으로 대체
-    const dmg = state.harryShield ? 5 : 22;
-    addLog(`🐍 볼드모트: Sectumsempra! → 해리 -${dmg}HP`, '#e74c3c');
-    state.harryHP -= dmg;
-    state.harryShield = false;
-    animHit('harry');
-    showDmgPopup('harry', dmg, 'normal');
-    SFX.hit();
-  } else {
-    const dmg = state.harryShield ? 3 : 10;
-    addLog(`🐍 볼드모트: Crucio! → 해리 -${dmg}HP, 3턴간 독 데미지(-5HP/턴)`, '#e74c3c');
-    state.harryHP -= dmg;
-    state.voldyPoison = 3;
-    state.harryShield = false;
-    animHit('harry');
-    showDmgPopup('harry', dmg, 'normal');
-    SFX.poison();
+function gainVoldyExp(amt) {
+  if (state.voldyLevel >= 5) return;
+  state.voldyExp += amt;
+  const needed = LEVEL_EXP[state.voldyLevel + 1] || 999;
+  if (state.voldyExp >= needed) {
+    state.voldyExp -= needed;
+    state.voldyLevel++;
+    const bonus = {2:{hp:25,mp:15},3:{hp:20,mp:20},4:{hp:30,mp:20},5:{hp:25,mp:25}}[state.voldyLevel];
+    if (bonus) {
+      state.voldyMaxHP += bonus.hp;
+      state.voldyHP = Math.min(state.voldyMaxHP, state.voldyHP + bonus.hp);
+      state.voldyMaxMP += bonus.mp;
+      state.voldyMP = Math.min(state.voldyMaxMP, state.voldyMP + bonus.mp);
+    }
+    addLog(`🐍 볼드모트가 Lv.${state.voldyLevel}로 성장했다! 더 강해졌다!`, '#b44aff');
+    updateUI();
   }
 }
 
+function voldyAvada() {
+  const baseDmg = 32 + state.voldyLevel * 3;
+  const dmg = state.harryShield ? Math.round(baseDmg * 0.25) : baseDmg;
+  const shield = state.harryShield ? ' (방어막 경감!)' : '';
+  addLog(`🐍 볼드모트: Avada Kedavra! → 해리 -${dmg}HP${shield}`, '#e74c3c');
+  state.harryHP -= dmg; state.harryShield = false;
+  animHit('harry'); showDmgPopup('harry', dmg, 'normal'); SFX.hit();
+}
+function voldyCrucio() {
+  if (state.voldyPoison > 0) {
+    const dmg = state.harryShield ? 4 : 20 + state.voldyLevel * 2;
+    addLog(`🐍 볼드모트: Sectumsempra! → 해리 -${dmg}HP`, '#e74c3c');
+    state.harryHP -= dmg; state.harryShield = false;
+    animHit('harry'); showDmgPopup('harry', dmg, 'normal'); SFX.hit();
+  } else {
+    const dmg = state.harryShield ? 2 : 8 + state.voldyLevel;
+    addLog(`🐍 볼드모트: Crucio! → 해리 -${dmg}HP, 3턴간 독(-5HP/턴)`, '#e74c3c');
+    state.harryHP -= dmg; state.voldyPoison = 3; state.harryShield = false;
+    animHit('harry'); showDmgPopup('harry', dmg, 'normal'); SFX.poison();
+  }
+}
 function voldyImperio() {
-  const dmg = state.harryShield ? 2 : 5;
-  addLog(`🐍 볼드모트: Imperio! → 해리 -${dmg}HP, 다음 턴 해리 행동 불능!`, '#e74c3c');
-  state.harryHP -= dmg;
-  state.harryStunned = true;
-  state.harryShield = false;
-  animHit('harry');
-  showDmgPopup('harry', dmg, 'normal');
-  SFX.stupefy();
+  const dmg = state.harryShield ? 2 : 4 + state.voldyLevel;
+  addLog(`🐍 볼드모트: Imperio! → 해리 -${dmg}HP, 다음 턴 행동 불능!`, '#e74c3c');
+  state.harryHP -= dmg; state.harryStunned = true; state.harryShield = false;
+  animHit('harry'); showDmgPopup('harry', dmg, 'normal'); SFX.stupefy();
 }
 
 function endVoldyTurn() {
   updateUI();
   if (checkGameOver()) return;
-
   setTimeout(() => {
     state.turn = 1;
     addLog('─────────────────────────────', '#2a2a5a');
-
     if (state.harryStunned) {
       addLog('⚡ 해리가 Imperio에 걸려 이번 턴 행동 불능!', '#f1c40f');
-      state.harryStunned = false;
-      state.turnCount++;
-      state.harryMP = Math.min(HARRY_MAX_MP, state.harryMP + 5);
+      state.harryStunned = false; state.turnCount++;
+      state.harryMP = Math.min(state.harryMaxMP, state.harryMP + 5);
       updateUI();
       setTimeout(() => {
         document.getElementById('voldyThinking').classList.add('visible');
@@ -1025,49 +1275,83 @@ function endVoldyTurn() {
   }, 1200);
 }
 
-// ─── UI 업데이트 ─────────────────────────────────────────────────────────────
+// ─── UI ──────────────────────────────────────────────────────────────────────
 function updateUI() {
-  // HP
-  const hPct = Math.max(0, state.harryHP / HARRY_MAX_HP * 100);
-  const vPct = Math.max(0, state.voldyHP / VOLDY_MAX_HP * 100);
+  const hPct = Math.max(0, state.harryHP / state.harryMaxHP * 100);
+  const vPct = Math.max(0, state.voldyHP / state.voldyMaxHP * 100);
   document.getElementById('harryHpBar').style.width = hPct + '%';
   document.getElementById('harryHpBar').style.backgroundColor = hpColor(hPct);
-  document.getElementById('harryHpNum').textContent = `${Math.max(0,Math.round(state.harryHP))} / ${HARRY_MAX_HP}`;
+  document.getElementById('harryHpNum').textContent = `${Math.max(0,Math.round(state.harryHP))} / ${state.harryMaxHP}`;
   document.getElementById('voldyHpBar').style.width = vPct + '%';
   document.getElementById('voldyHpBar').style.backgroundColor = hpColor(vPct);
-  document.getElementById('voldyHpNum').textContent = `${Math.max(0,Math.round(state.voldyHP))} / ${VOLDY_MAX_HP}`;
+  document.getElementById('voldyHpNum').textContent = `${Math.max(0,Math.round(state.voldyHP))} / ${state.voldyMaxHP}`;
 
-  // MP
-  document.getElementById('harryMpBar').style.width = (state.harryMP / HARRY_MAX_MP * 100) + '%';
-  document.getElementById('harryMpLabel').textContent = `MP: ${state.harryMP} / ${HARRY_MAX_MP}`;
-  document.getElementById('voldyMpBar').style.width = (state.voldyMP / VOLDY_MAX_MP * 100) + '%';
-  document.getElementById('voldyMpLabel').textContent = `MP: ${state.voldyMP} / ${VOLDY_MAX_MP}`;
+  document.getElementById('harryMpBar').style.width = (state.harryMP / state.harryMaxMP * 100) + '%';
+  document.getElementById('harryMpLabel').textContent = `MP: ${state.harryMP} / ${state.harryMaxMP}`;
+  document.getElementById('voldyMpBar').style.width = (state.voldyMP / state.voldyMaxMP * 100) + '%';
+  document.getElementById('voldyMpLabel').textContent = `MP: ${state.voldyMP} / ${state.voldyMaxMP}`;
 
-  // 턴 표시
+  // EXP 바
+  if (state.harryLevel < 5) {
+    const needed = LEVEL_EXP[state.harryLevel + 1] || 1;
+    document.getElementById('harryExpBar').style.width = (state.harryExp / needed * 100) + '%';
+  } else document.getElementById('harryExpBar').style.width = '100%';
+  if (state.voldyLevel < 5) {
+    const vn = LEVEL_EXP[state.voldyLevel + 1] || 1;
+    document.getElementById('voldyExpBar').style.width = (state.voldyExp / vn * 100) + '%';
+  } else document.getElementById('voldyExpBar').style.width = '100%';
+
+  // 레벨 뱃지
+  document.getElementById('harryLvBadge').textContent = `Lv.${state.harryLevel}`;
+  document.getElementById('voldyLvBadge').textContent = `Lv.${state.voldyLevel}`;
+
   document.getElementById('turnCount').textContent = `턴 ${state.turnCount}`;
+  document.getElementById('streakNum').textContent = state.consecutiveCrit;
 
-  // 상태이상 뱃지
-  const hBadges = document.getElementById('harryBadges');
-  hBadges.innerHTML = '';
-  if (state.voldyPoison > 0) hBadges.innerHTML += `<span class="badge badge-poison">☠️독 ${state.voldyPoison}턴</span>`;
-  if (state.harryShield)     hBadges.innerHTML += `<span class="badge badge-shield">🛡방어막</span>`;
-  if (state.harryStunned)    hBadges.innerHTML += `<span class="badge badge-stun">⚡행동불가</span>`;
+  // 상태 뱃지
+  const hb = document.getElementById('harryBadges');
+  hb.innerHTML = '';
+  if (state.voldyPoison > 0) hb.innerHTML += `<span class="badge badge-poison">☠️독 ${state.voldyPoison}턴</span>`;
+  if (state.harryShield) hb.innerHTML += `<span class="badge badge-shield">🛡방어막</span>`;
+  if (state.harryStunned) hb.innerHTML += `<span class="badge badge-stun">⚡행동불가</span>`;
+  if (state.harryRegen > 0) hb.innerHTML += `<span class="badge badge-regen">💚재생 ${state.harryRegen}턴</span>`;
 
-  // 아바다 쿨다운
-  const btn = document.getElementById('btnAvada');
+  const vb = document.getElementById('voldyBadges');
+  vb.innerHTML = '';
+  if (state.voldyBurn > 0) vb.innerHTML += `<span class="badge badge-burn">🔥화상 ${state.voldyBurn}턴</span>`;
+  if (state.voldyStunned) vb.innerHTML += `<span class="badge badge-stun">⚡행동불가</span>`;
+
+  // 쿨다운 버튼
+  const btnA = document.getElementById('btnAvada');
   if (state.avadaCooldown > 0) {
-    btn.disabled = true;
-    btn.querySelector('.spell-desc').innerHTML = `쿨타임<br>⏳${state.avadaCooldown}턴 남음`;
+    btnA.disabled = true;
+    btnA.querySelector('.spell-desc').innerHTML = `쿨타임<br>⏳${state.avadaCooldown}턴`;
   } else {
-    btn.disabled = false;
-    btn.querySelector('.spell-desc').innerHTML = `피해 50<br>쿨타임 3턴`;
+    btnA.disabled = false;
+    btnA.querySelector('.spell-desc').innerHTML = `피해 50<br>쿨타임 3턴`;
+  }
+  const btnL = document.getElementById('btnLumos');
+  if (state.lumosCooldown > 0) {
+    btnL.disabled = true;
+    btnL.querySelector('.spell-desc').innerHTML = `쿨타임<br>⏳${state.lumosCooldown}턴`;
+  } else {
+    btnL.disabled = false;
+    btnL.querySelector('.spell-desc').innerHTML = `MP 전체 회복<br>쿨타임 4턴`;
+  }
+  const btnI = document.getElementById('btnIncendio');
+  if (state.incendioCooldown > 0) {
+    btnI.disabled = true;
+    btnI.querySelector('.spell-desc').innerHTML = `쿨타임<br>⏳${state.incendioCooldown}턴`;
+  } else {
+    btnI.disabled = false;
+    btnI.querySelector('.spell-desc').innerHTML = `피해 30<br>화상 2턴`;
   }
 
-  // MP 부족 버튼 처리
-  const costs = {0:20, 1:25, 2:15, 3:50};
+  // MP 부족 버튼 비활성
+  const spellCosts = [20,25,15,50,30,35];
   document.querySelectorAll('.spell-btn').forEach((b, i) => {
-    if (i === 3 && state.avadaCooldown > 0) return;
-    b.disabled = state.harryMP < costs[i];
+    if (b.disabled) return;
+    if (state.harryMP < spellCosts[i]) b.disabled = true;
   });
 }
 
@@ -1076,62 +1360,56 @@ function hpColor(pct) {
   if (pct > 30) return '#f1c40f';
   return '#e74c3c';
 }
-
 function clampHP() {
-  state.harryHP = Math.max(0, Math.min(HARRY_MAX_HP, state.harryHP));
-  state.voldyHP = Math.max(0, Math.min(VOLDY_MAX_HP, state.voldyHP));
+  state.harryHP = Math.max(0, Math.min(state.harryMaxHP, state.harryHP));
+  state.voldyHP = Math.max(0, Math.min(state.voldyMaxHP, state.voldyHP));
 }
-
 function setButtonsEnabled(on) {
-  document.querySelectorAll('.spell-btn').forEach(b => {
-    if (on) {
-      b.disabled = false;
-    } else {
-      b.disabled = true;
-    }
-  });
+  document.querySelectorAll('.spell-btn').forEach(b => b.disabled = !on);
   if (on) updateUI();
 }
 
 // ─── 게임 종료 ───────────────────────────────────────────────────────────────
 function checkGameOver() {
   if (state.voldyHP <= 0) {
-    state.isOver = true;
-    SFX.win();
-    stopBGM();
-    showGameover('⚡ 해리 포터 승리!', '볼드모트를 물리쳤습니다!', '#f0c060');
-    return true;
+    state.isOver = true; SFX.win(); stopBGM();
+    showGameover('⚡ 해리 포터 승리!', '볼드모트를 물리쳤습니다!', '#f0c060'); return true;
   }
   if (state.harryHP <= 0) {
-    state.isOver = true;
-    SFX.lose();
-    stopBGM();
-    showGameover('💀 볼드모트 승리...', '해리가 쓰러졌습니다...', '#e74c3c');
-    return true;
+    state.isOver = true; SFX.lose(); stopBGM();
+    showGameover('💀 볼드모트 승리...', '해리가 쓰러졌습니다...', '#e74c3c'); return true;
   }
   return false;
 }
 
 function showGameover(title, sub, color) {
-  // 패배한 쪽 hit 이미지로 고정
   if (state.voldyHP <= 0) setSprite('voldy', 'hit');
   if (state.harryHP <= 0) setSprite('harry', 'hit');
-  const ov = document.getElementById('gameoverOverlay');
+  const accuracy = state.totalCrits + state.totalHits + state.totalMisses > 0
+    ? Math.round(state.totalCrits / (state.totalCrits + state.totalHits + state.totalMisses) * 100)
+    : 0;
   document.getElementById('gameoverTitle').textContent = title;
   document.getElementById('gameoverTitle').style.color = color;
   document.getElementById('gameoverSub').textContent = sub;
-  ov.style.display = 'flex';
+  document.getElementById('gameoverStats').innerHTML = `
+    총 턴: <b>${state.turnCount}</b> &nbsp;|&nbsp;
+    크리티컬: <b>${state.totalCrits}회</b> &nbsp;|&nbsp;
+    미스: <b>${state.totalMisses}회</b><br>
+    최고 연속 크리티컬: <b>${state.consecutiveCrit > 0 ? state.critCombo : 0}회</b> &nbsp;|&nbsp;
+    달성 레벨: <b>Lv.${state.harryLevel}</b><br>
+    크리티컬 비율: <b>${accuracy}%</b>
+  `;
+  document.getElementById('gameoverOverlay').style.display = 'flex';
 }
 
-// 스프라이트 이미지 교체 헬퍼
+// ─── 스프라이트 ──────────────────────────────────────────────────────────────
 const SPRITES = {
   harry: { stand:'harry_stand.jpg', attack:'harry_attack.jpg', hit:'harry_hit.jpg' },
-  voldy: { stand:'voldy_stand.jpg', attack:'voldy_attack.jpg', hit:'voldy_hit.jpg'  },
+  voldy: { stand:'voldy_stand.jpg', attack:'voldy_attack.jpg', hit:'voldy_hit.jpg' },
 };
-function setSprite(who, state) {
-  const id = who === 'harry' ? 'harryImg' : 'voldyImg';
-  const img = document.getElementById(id);
-  if (img) img.src = SPRITES[who][state];
+function setSprite(who, st) {
+  const img = document.getElementById(who === 'harry' ? 'harryImg' : 'voldyImg');
+  if (img) img.src = SPRITES[who][st];
 }
 
 // ─── 애니메이션 ──────────────────────────────────────────────────────────────
@@ -1140,80 +1418,56 @@ function animAttack(who) {
   el.classList.remove('float-anim');
   el.classList.add(who === 'harry' ? 'attack-anim' : 'vatk-anim');
   setSprite(who, 'attack');
-  setTimeout(() => {
-    el.classList.remove('attack-anim','vatk-anim');
-    el.classList.add('float-anim');
-    setSprite(who, 'stand');
-  }, 700);
+  setTimeout(() => { el.classList.remove('attack-anim','vatk-anim'); el.classList.add('float-anim'); setSprite(who,'stand'); }, 700);
 }
-
 function animHit(who) {
   setTimeout(() => {
     const el = document.getElementById(who === 'harry' ? 'harrySprite' : 'voldySprite');
     el.classList.remove('float-anim');
-    el.classList.add('hit-anim', 'flash-anim');
+    el.classList.add('hit-anim','flash-anim');
     setSprite(who, 'hit');
-    setTimeout(() => {
-      el.classList.remove('hit-anim','flash-anim');
-      el.classList.add('float-anim');
-      if (!state.isOver) setSprite(who, 'stand');
-    }, 600);
+    setTimeout(() => { el.classList.remove('hit-anim','flash-anim'); el.classList.add('float-anim'); if(!state.isOver) setSprite(who,'stand'); }, 600);
   }, 300);
 }
-
 function showDmgPopup(target, dmg, hitType) {
   const panel = document.getElementById(target === 'harry' ? 'harryPanel' : 'voldyPanel');
-  const popup = document.createElement('div');
-  popup.className = 'dmg-popup';
-  popup.style.color = hitType === 'critical' ? '#f1c40f' : '#e74c3c';
-  popup.textContent = (hitType === 'critical' ? '💥' : '') + '-' + dmg;
-  panel.appendChild(popup);
-  setTimeout(() => popup.remove(), 1300);
+  const p = document.createElement('div');
+  p.className = 'dmg-popup';
+  p.style.color = hitType === 'critical' ? '#f1c40f' : '#e74c3c';
+  p.textContent = (hitType === 'critical' ? '💥' : '') + '-' + dmg;
+  panel.appendChild(p);
+  setTimeout(() => p.remove(), 1300);
 }
-
 function showHealPopup(target, amt) {
   const panel = document.getElementById(target === 'harry' ? 'harryPanel' : 'voldyPanel');
-  const popup = document.createElement('div');
-  popup.className = 'dmg-popup';
-  popup.style.color = '#2ecc71';
-  popup.textContent = '+' + amt;
-  panel.appendChild(popup);
-  setTimeout(() => popup.remove(), 1300);
+  const p = document.createElement('div');
+  p.className = 'dmg-popup';
+  p.style.color = '#2ecc71';
+  p.textContent = '+' + amt;
+  panel.appendChild(p);
+  setTimeout(() => p.remove(), 1300);
 }
 
-// ─── 로그 ─────────────────────────────────────────────────────────────────────
+// ─── 로그 ────────────────────────────────────────────────────────────────────
 function addLog(msg, color='white') {
   const box = document.getElementById('logBox');
   const d = document.createElement('div');
-  d.className = 'log-entry';
-  d.style.color = color;
-  d.textContent = msg;
-  box.appendChild(d);
-  box.scrollTop = box.scrollHeight;
+  d.className = 'log-entry'; d.style.color = color; d.textContent = msg;
+  box.appendChild(d); box.scrollTop = box.scrollHeight;
 }
 
 // ─── 소리 안내 ───────────────────────────────────────────────────────────────
 function showSoundGuide() {
-  const toast = document.getElementById('soundToast');
-  toast.innerHTML = `
-    🎵 <strong>배경음악/효과음 안내</strong><br>
-    이 게임은 <strong>Web Audio API</strong>로 모든 소리를 실시간 생성합니다.<br>
-    별도 파일 없이 브라우저에서 바로 작동해요!<br>
-    소리가 안 들리면 버튼을 한 번 눌러보세요.
-  `;
-  toast.classList.add('show');
-  // BGM 시작 (첫 클릭으로 AudioContext 활성화)
+  const t = document.getElementById('soundToast');
+  t.innerHTML = `🎵 배경음악(bgm.mp3)이 재생됩니다.<br>소리가 안 들리면 화면을 한 번 클릭해 보세요!`;
+  t.classList.add('show');
   try { playBGM(); } catch(e) {}
-  setTimeout(() => toast.classList.remove('show'), 4000);
+  setTimeout(() => t.classList.remove('show'), 3500);
 }
 
 // ─── 초기화 ──────────────────────────────────────────────────────────────────
 updateUI();
-
-// 첫 클릭 시 BGM 시작 (브라우저 정책)
-document.addEventListener('click', () => {
-  if (!bgPlaying) { bgEnabled = true; playBGM(); }
-}, { once: true });
+document.addEventListener('click', () => { if(!bgPlaying) playBGM(); }, { once: true });
 </script>
 </body>
 </html>
