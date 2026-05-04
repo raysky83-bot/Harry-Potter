@@ -398,7 +398,7 @@
     </button>
     <button class="spell-btn s-stupefy" onclick="startTiming('스투페파이')">
       <span class="spell-mp-cost">30MP</span>
-      <img src="icon_swirl.png" class="spell-icon-img" alt="소용돌이">
+      <img src="icon_swirl.jpg" class="spell-icon-img" alt="소용돌이">
       <span class="spell-name">Stupefy</span>
       <span class="spell-desc">피해 15<br>🔥크리만 턴 스킵</span>
     </button>
@@ -512,6 +512,8 @@ const TARGET_NORMAL = [1.50, 2.00, 2.50, 3.00, 3.50, 4.00, 4.50];
 const TARGET_HARD   = [1.00, 1.50, 2.00, 2.50, 3.00, 3.50, 4.00];
 
 // ── 게임 상태 ──────────────────────────────────────────────────────────────
+let voldyTimerId = null; // 💡 [버그 수정] 볼드모트 턴 타이머 ID
+
 let state = {
   harryHP: HARRY_MAX_HP, harryMaxHP: HARRY_MAX_HP,
   harryMP: HARRY_MAX_MP, harryMaxMP: HARRY_MAX_MP,
@@ -529,7 +531,6 @@ let state = {
   harryAtkMult: 1.0,
   critRangeBonus: 0,
   voldyForm: 1, voldyRage: false,
-  // 💡 해리 공격력 감소(harryDmgMult) 삭제! 1.0으로 고정
   voldyAtkMult: 1.0,
   harryDmgMult: 1.0 
 };
@@ -539,7 +540,6 @@ function selectDifficulty(level) {
   if (level === 'easy') {
     VOLDY_MAX_HP = 100;
     state.voldyAtkMult = 0.7;
-    // 해리 마법 위력은 무조건 1.0 (감소/증폭 없음)
     state.harryDmgMult = 1.0; 
   } else if (level === 'normal') {
     VOLDY_MAX_HP = 160;
@@ -646,7 +646,6 @@ function startTiming(spell) {
     const bw2     = EL.timingBarWrap.offsetWidth || 340;
     const pct     = Math.min(elapsed / BAR_DURATION, 1);
 
-    // 블라인드 모드 (필살기 전용)
     const isBlindActive = (pendingSpell === '아바다' && elapsed > targetTime * 0.6);
 
     if (isBlindActive) {
@@ -753,7 +752,9 @@ function doWait() {
   EL.voldyThinking.classList.add('visible');
   EL.voldyPanel.classList.add('active-turn');
   EL.harryPanel.classList.remove('active-turn');
-  setTimeout(voldemortTurn, 1800);
+  
+  clearTimeout(voldyTimerId); // 💡 확실하게 턴 예약
+  voldyTimerId = setTimeout(voldemortTurn, 1800);
 }
 
 // ── Web Audio ──────────────────────────────────────────────────────────────
@@ -850,7 +851,6 @@ function executeSpell(spell, hitType, comboMult=1.0) {
   animAttack('harry');
 
   if (spell === '익스펙토') {
-    // 💡 해리 데미지는 항상 1.0 배율을 사용 (state.harryDmgMult 고정값 적용)
     const dmg = Math.round(22 * mult * atkMult * state.harryDmgMult);
     addLog(`⚡ 해리: Expelliarmus! ${prefix}→ 볼드모트 -${dmg}HP`, logClr);
     if (mult > 0) { state.voldyHP -= dmg; animHit('voldy'); showDmgPopup('voldy',dmg,hitType); SFX.hit(); gainExp('harry',10+(isCrit?10:0)); }
@@ -886,7 +886,6 @@ function executeSpell(spell, hitType, comboMult=1.0) {
     state.turn = 2;
 
   } else if (spell === '아바다') {
-    // 필살기 데미지 100~150 + 크리티컬 보너스 (난이도 감소 삭제)
     let baseDmg = Math.floor(Math.random() * 51) + 100;
     let avadaMult = mult;
     if (isCrit) { avadaMult = (1.5 + Math.random() * 1.0) * comboMult; }
@@ -930,12 +929,15 @@ function executeSpell(spell, hitType, comboMult=1.0) {
     EL.voldyThinking.classList.add('visible');
     EL.voldyPanel.classList.add('active-turn');
     EL.harryPanel.classList.remove('active-turn');
-    setTimeout(voldemortTurn, 1800);
+    
+    clearTimeout(voldyTimerId); // 💡 확실하게 턴 예약
+    voldyTimerId = setTimeout(voldemortTurn, 1800);
   } else {
     addLog('─────────────────────────────','#2a2a5a');
     addLog('👓 해리의 턴 — 주문을 선택하세요.','#4a9eff');
     EL.harryPanel.classList.add('active-turn');
     EL.voldyPanel.classList.remove('active-turn');
+    clearTimeout(voldyTimerId); // 💡 해리 턴에서는 무조건 타이머 삭제
     setButtonsEnabled(true);
   }
 }
@@ -1013,6 +1015,13 @@ function showLevelup(desc) {
 // ── 볼드모트 AI ─────────────────────────────────────────────────────────────
 function voldemortTurn() {
   if (state.isOver) return;
+
+  // 💡 [버그 수정] 스탑워치가 진행 중이면 볼드모트가 공격을 멈추고 1초 뒤로 미룹니다.
+  if (isTiming) {
+      voldyTimerId = setTimeout(voldemortTurn, 1000); 
+      return; 
+  }
+
   EL.voldyThinking.classList.remove('visible');
 
   if (state.voldyStunned) {
@@ -1099,7 +1108,8 @@ function voldyImperio(rageMult=1.0) {
 function endVoldyTurn() {
   updateUI();
   if (checkGameOver()) return;
-  setTimeout(()=>{
+  
+  voldyTimerId = setTimeout(()=>{
     state.turn = 1;
     addLog('─────────────────────────────','#2a2a5a');
 
@@ -1113,16 +1123,20 @@ function endVoldyTurn() {
       if (state.incendioCooldown > 0) state.incendioCooldown--;
       updateUI();
       if (checkGameOver()) return;
-      setTimeout(()=>{
+      
+      voldyTimerId = setTimeout(()=>{
         EL.voldyThinking.classList.add('visible');
         EL.voldyPanel.classList.add('active-turn');
         EL.harryPanel.classList.remove('active-turn');
-        setTimeout(voldemortTurn, 1800);
+        voldyTimerId = setTimeout(voldemortTurn, 1800);
       }, 1000);
     } else {
       addLog('👓 해리의 턴 — 주문을 선택하세요.','#4a9eff');
       EL.harryPanel.classList.add('active-turn');
       EL.voldyPanel.classList.remove('active-turn');
+      
+      clearTimeout(voldyTimerId); // 💡 확실하게 턴 예약 취소
+      
       setButtonsEnabled(true);
     }
   }, 1200);
@@ -1143,15 +1157,19 @@ function updateUI() {
   EL.voldyMpBar.style.width = (state.voldyMP/state.voldyMaxMP*100)+'%';
   EL.voldyMpLabel.textContent = `MP: ${state.voldyMP} / ${state.voldyMaxMP}`;
 
-  const hExpN = LEVEL_EXP[state.harryLevel+1] || 1;
-  EL.harryExpBar.style.width = (state.harryLevel>=5?100:state.harryExp/hExpN*100)+'%';
-  const vExpN = LEVEL_EXP[state.voldyLevel+1] || 1;
-  EL.voldyExpBar.style.width = (state.voldyLevel>=5?100:state.voldyExp/vExpN*100)+'%';
+  if (state.harryLevel < 5) {
+    const needed = LEVEL_EXP[state.harryLevel + 1] || 1;
+    document.getElementById('harryExpBar').style.width = (state.harryExp / needed * 100) + '%';
+  } else document.getElementById('harryExpBar').style.width = '100%';
+  if (state.voldyLevel < 5) {
+    const vn = LEVEL_EXP[state.voldyLevel + 1] || 1;
+    document.getElementById('voldyExpBar').style.width = (state.voldyExp / vn * 100) + '%';
+  } else document.getElementById('voldyExpBar').style.width = '100%';
 
-  EL.harryLvBadge.textContent = `Lv.${state.harryLevel}`;
-  EL.voldyLvBadge.textContent = `Lv.${state.voldyLevel}`;
-  EL.turnCount.textContent = `턴 ${state.turnCount}`;
-  EL.bestComboNum.textContent = state.maxCombo;
+  document.getElementById('harryLvBadge').textContent = `Lv.${state.harryLevel}`;
+  document.getElementById('voldyLvBadge').textContent = `Lv.${state.voldyLevel}`;
+  document.getElementById('turnCount').textContent = `턴 ${state.turnCount}`;
+  document.getElementById('bestComboNum').textContent = state.maxCombo;
 
   const onlyWaitAvailable = state.harryMP < 15;
   EL.dangerBanner.style.display = onlyWaitAvailable ? 'block' : 'none';
@@ -1175,9 +1193,10 @@ function updateUI() {
   setCd(EL.btnLumos,    state.lumosCooldown,    'MP 전체 회복<br>쿨타임 4턴');
   setCd(EL.btnIncendio, state.incendioCooldown, '피해 28<br>화상 2턴');
 
-  const spellCosts = [20,30,15,50,30,35];
-  document.querySelectorAll('.spell-btn:not(.s-wait)').forEach((b,i)=>{
-    if (!b.disabled && state.harryMP < spellCosts[i]) b.disabled = true;
+  const spellCosts = [20,30,15,50,30,35,0];
+  document.querySelectorAll('.spell-btn').forEach((b, i) => {
+    if (b.disabled && i !== 3 && i !== 4 && i !== 5) return; 
+    if (state.harryMP < spellCosts[i]) b.disabled = true;
   });
 }
 
