@@ -1540,20 +1540,29 @@ function voldyImperio(rageMult=1.0) {
 function endVoldyTurn() {
   updateUI(); if(checkGameOver()) return;
   setTimeout(()=>{
-    state.turn=1;
     addLog('─────────────────────────────','#2a2a5a');
     if (state.harryStunned>0) {
+      // ✅ FIX: 행동불능 중엔 turn=2 유지 → voldemortTurn guard 통과
+      state.turn=2;
       addLog(`⚡ 해리가 Imperio에 걸려 행동 불능! (남은 턴: ${state.harryStunned})`, '#f1c40f');
       state.harryStunned--;
       state.turnCount++;
       state.harryMP=Math.min(state.harryMaxMP,state.harryMP+6);
-      if(state.avadaCooldown>0)   state.avadaCooldown--;
-      if(state.lumosCooldown>0)   state.lumosCooldown--;
+      if(state.avadaCooldown>0)    state.avadaCooldown--;
+      if(state.lumosCooldown>0)    state.lumosCooldown--;
       if(state.incendioCooldown>0) state.incendioCooldown--;
-      if(state.stupefyCooldown>0) state.stupefyCooldown--;
+      if(state.stupefyCooldown>0)  state.stupefyCooldown--;
+      checkVoldyForm(); // ✅ FIX: 폼 체크 추가
       updateUI(); if(checkGameOver()) return;
-      setTimeout(()=>{ EL.voldyThinking.classList.add('visible'); EL.voldyPanel.classList.add('active-turn'); EL.harryPanel.classList.remove('active-turn'); setTimeout(voldemortTurn,1800); }, 1000);
+      setTimeout(()=>{
+        EL.voldyThinking.classList.add('visible');
+        EL.voldyPanel.classList.add('active-turn');
+        EL.harryPanel.classList.remove('active-turn');
+        setTimeout(voldemortTurn, 1800);
+      }, 1000);
     } else {
+      // 해리 턴으로 넘길 때만 turn=1
+      state.turn=1;
       addLog('👓 해리의 턴 — 주문을 선택하세요.','#4a9eff');
       EL.harryPanel.classList.add('active-turn');
       EL.voldyPanel.classList.remove('active-turn');
