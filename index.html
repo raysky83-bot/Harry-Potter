@@ -659,7 +659,7 @@
   </div>
 
   <div class="spell-grid" id="spellGrid">
-    <button class="spell-btn s-expel" onclick="startTiming('익스펙토')">
+    <button class="spell-btn s-expel" onclick="startTiming('익스펙토')" id="btnExpel">
       <span class="spell-mp-cost">20MP</span>
       <img src="icon_lightning.jpg" class="spell-icon-img" alt="번개">
       <span class="spell-name">Expelliarmus</span>
@@ -671,7 +671,7 @@
       <span class="spell-name">Stupefy</span>
       <span class="spell-desc">피해 10<br>크리시 턴 스킵</span>
     </button>
-    <button class="spell-btn s-protego" onclick="startTiming('프로테고')">
+    <button class="spell-btn s-protego" onclick="startTiming('프로테고')" id="btnProtego">
       <span class="spell-mp-cost">15MP</span>
       <img src="icon_shield.jpg" class="spell-icon-img" alt="방패">
       <span class="spell-name">Protego</span>
@@ -713,7 +713,7 @@
     <div class="timing-spell-icon" id="timingSpellIcon">⚡</div>
     <div class="timing-spell-detail">
       <div class="timing-spell-name" id="timingSpellSubName">Expelliarmus</div>
-      <div class="timing-spell-hint" id="timingSpellHint">커서가 🟡 황금 구간에 있을 때 STOP!</div>
+      <div class="timing-spell-hint" id="timingSpellHint">스페이스바 또는 화면 아무 곳이나 클릭!</div>
     </div>
   </div>
 
@@ -745,7 +745,7 @@
 
   <button class="stop-btn" id="stopBtn">
     <span>STOP</span>
-    <span style="font-size:10px;opacity:0.7;font-family:'Noto Sans KR',sans-serif;font-weight:400;letter-spacing:0;">지금 멈추기</span>
+    <span style="font-size:10px;opacity:0.7;font-family:'Noto Sans KR',sans-serif;font-weight:400;letter-spacing:0;">화면 터치 / 스페이스바</span>
   </button>
 </div>
 
@@ -879,6 +879,8 @@ function startGame() {
   // 난이도에 따라 state 초기화
   state.voldyMaxHP  = D.voldyMaxHP;
   state.voldyHP     = D.voldyMaxHP;
+  state.stupefyCooldown = 0; // 스투페파이 쿨타임 초기화
+  state.isProcessing = false; // 중복 동작 방지 락 초기화
 
   // 난이도 배지 업데이트
   const badge = document.getElementById('diffBadge');
@@ -926,7 +928,7 @@ let state = {
   harryMP: HARRY_MAX_MP, harryMaxMP: HARRY_MAX_MP,
   voldyHP: 160,          voldyMaxHP: 160,           // startGame에서 덮어씀
   voldyMP: VOLDY_MAX_MP, voldyMaxMP: VOLDY_MAX_MP,
-  turn: 1, turnCount: 1, isOver: false,
+  turn: 1, turnCount: 1, isOver: false, isProcessing: false,
   avadaCooldown: 0, lumosCooldown: 0, incendioCooldown: 0, stupefyCooldown: 0,
   voldyPoison: 0, voldyBurn: 0,
   harryShield: false, harryStunned: 0, voldyStunned: false,
@@ -943,15 +945,16 @@ let state = {
 // ════════════════════════════════════════════
 // 기술별 왕복 커서 파라미터
 // (난이도 배율과 곱해서 최종 사용)
+// cm (critMult): 아바다 케다브라의 극악 난이도를 위한 크리티컬 영역 배수
 // ════════════════════════════════════════════
 const SPELL_PROFILES = {
-  //              initSpeedMult  accelMult  critPos   icon   hint
-  익스펙토:   { sm:1.00, am:1.00, pos:0.50, icon:'⚡', hint:'중앙에서 멈추세요 — 기본기!' },
-  스투페파이: { sm:1.20, am:1.10, pos:0.50, icon:'🌀', hint:'크리티컬만 턴 스킵! 쿨타임 2턴' },
-  프로테고:   { sm:0.60, am:0.70, pos:0.50, icon:'🛡️', hint:'성공 시 다음 턴 회피율 +40%!' },
-  아바다:     { sm:1.80, am:2.00, pos:0.50, icon:'☠️', hint:'⚡극한 난이도! 빠르고 좁은 크리 구간' },
-  루모스:     { sm:0.75, am:0.85, pos:0.50, icon:'💡', hint:'MP 회복 — 차분하게 멈추세요' },
-  인센디오:   { sm:1.45, am:1.50, pos:0.50, icon:'🔥', hint:'빠르고 거친 불꽃처럼! 순발력 필요' },
+  //              initSpeedMult  accelMult  critPos   cm      icon   hint
+  익스펙토:   { sm:1.00, am:1.00, pos:0.50, cm:1.00, icon:'⚡', hint:'중앙에서 멈추세요 — 기본기!' },
+  스투페파이: { sm:1.20, am:1.10, pos:0.50, cm:1.00, icon:'🌀', hint:'크리티컬만 턴 스킵! 쿨타임 2턴' },
+  프로테고:   { sm:0.60, am:0.70, pos:0.50, cm:1.00, icon:'🛡️', hint:'성공 시 다음 턴 회피율 +40%!' },
+  아바다:     { sm:1.80, am:2.00, pos:0.50, cm:0.35, icon:'☠️', hint:'⚡극한 난이도! 빠르고 좁은 크리 구간' },
+  루모스:     { sm:0.75, am:0.85, pos:0.50, cm:1.00, icon:'💡', hint:'MP 회복 — 차분하게 멈추세요' },
+  인센디오:   { sm:1.45, am:1.50, pos:0.50, cm:1.00, icon:'🔥', hint:'빠르고 거친 불꽃처럼! 순발력 필요' },
 };
 
 // ── 타이밍 상태 ─────────────────────────────────────────────────────────────
@@ -979,10 +982,11 @@ function setupBounceBar(spell) {
                : (spell === '아바다')     ? D.critHalfW * 0.45  // ✅ 아바다: 크리 구간 절반 이하
                : D.critHalfW;
   const critRangeBonus = state.critRangeBonus;
+  const critMult = prof.cm || 1.0;
 
   critCenter  = prof.pos;
-  critHalfW   = Math.min(diffCH + critRangeBonus * 0.5, 0.35);
-  normHalfW   = Math.min(D.normHalfW + critRangeBonus * 0.8, 0.48);
+  critHalfW   = Math.min(diffCH * critMult + critRangeBonus * 0.5, 0.35);
+  normHalfW   = Math.min(D.normHalfW * critMult + critRangeBonus * 0.8, 0.48);
   isStupefyMode = (spell === '스투페파이');
 
   cursorPos   = 0;
@@ -1020,7 +1024,7 @@ function setupBounceBar(spell) {
     익스펙토:'Expelliarmus', 스투페파이:'Stupefy', 프로테고:'Protego',
     아바다:'Avada Kedavra', 루모스:'Lumos Maxima', 인센디오:'Incendio'
   }[spell];
-  document.getElementById('timingSpellHint').textContent   = prof.hint;
+  document.getElementById('timingSpellHint').textContent   = prof.hint + " (스페이스바/화면 클릭)";
   document.getElementById('timingSpellName').textContent   = '✨ ' + {
     익스펙토:'Expelliarmus', 스투페파이:'Stupefy', 프로테고:'Protego',
     아바다:'Avada Kedavra', 루모스:'Lumos Maxima', 인센디오:'Incendio'
@@ -1042,7 +1046,7 @@ function updateSpeedLabel() {
 
 // ── 타이밍 시작 ─────────────────────────────────────────────────────────────
 function startTiming(spell) {
-  if (state.turn !== 1 || state.isOver) return;
+  if (state.turn !== 1 || state.isOver || state.isProcessing) return;
   if (spell === '아바다'   && state.avadaCooldown   > 0) return;
   if (spell === '루모스'   && state.lumosCooldown   > 0) return;
   if (spell === '인센디오' && state.incendioCooldown > 0) return;
@@ -1054,6 +1058,12 @@ function startTiming(spell) {
     return;
   }
 
+  // ✅ 버튼 포커스를 해제하여 스페이스바를 누를 때 버튼이 중복 클릭되는 것을 방지합니다.
+  if (document.activeElement) {
+    document.activeElement.blur();
+  }
+
+  state.isProcessing = true; // 동작 시작 잠금
   pendingSpell = spell;
   EL.timingOverlay.style.display = 'flex';
   setupBounceBar(spell);
@@ -1127,11 +1137,6 @@ function doStop() {
   if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
   EL.timingOverlay.style.display = 'none';
 
-  // ✅ FIX: pendingSpell 즉시 캡처 후 초기화 → 중복 호출 시 executeSpell 재진입 차단
-  const spellToExecute = pendingSpell;
-  pendingSpell = '';
-  if (!spellToExecute) return;
-
   // 커서 중심 위치로 판정
   const bw  = EL.timingBarWrap.offsetWidth || 380;
   const curW = EL.timingCursor.offsetWidth || 8;
@@ -1163,7 +1168,7 @@ function doStop() {
   // 속도를 퍼센트로 환산해 로그
   const speedPct = Math.round(cursorSpeed / D.initSpeed * 100);
   addLog(`🎯 반사 ${bounceCount}회 | 속도 ${speedPct}% | ${hitType==='critical'?'🔥크리티컬':hitType==='normal'?'✅히트':'💨미스'}`, '#8899aa');
-  executeSpell(spellToExecute, hitType, comboMult);
+  executeSpell(pendingSpell, hitType, comboMult);
 }
 
 // ── DOM 캐시 ───────────────────────────────────────────────────────────────
@@ -1180,20 +1185,27 @@ function cacheEls() {
    'dangerBanner','formBanner','stupefyWarning'
   ].forEach(id => EL[id] = document.getElementById(id));
 
-  // ✅ FIX: touchstart → click 이중 발화 방지
+  // STOP 버튼 이벤트
   const sb = document.getElementById('stopBtn');
-  let _touchFired = false;
-  sb.addEventListener('touchstart', e=>{
-    e.preventDefault();
-    _touchFired = true;
-    doStop();
-    setTimeout(()=>{ _touchFired = false; }, 400);
-  }, { passive:false });
-  sb.addEventListener('click', ()=>{
-    if (_touchFired) return;
-    doStop();
+  sb.addEventListener('touchstart', e=>{ e.preventDefault(); doStop(); }, { passive:false });
+  sb.addEventListener('click', doStop);
+
+  // ✅ 화면 아무 곳이나 클릭/터치해도 멈추도록 이벤트 추가
+  EL.timingOverlay.addEventListener('mousedown', function(e) {
+    if (isTiming) doStop();
   });
+  EL.timingOverlay.addEventListener('touchstart', function(e) {
+    if (isTiming) { e.preventDefault(); doStop(); }
+  }, { passive: false });
 }
+
+// ✅ 스페이스바 입력 시 멈추도록 전체 문서에 이벤트 추가
+document.addEventListener('keydown', function(e) {
+  if (isTiming && (e.code === 'Space' || e.key === ' ')) {
+    e.preventDefault(); // 스페이스바를 누를 때 스크롤이 내려가는 현상 방지
+    doStop();
+  }
+});
 
 function flashScreen(type) {
   const el = EL.resultFlash; el.className = type;
@@ -1202,7 +1214,8 @@ function flashScreen(type) {
 
 // ── 턴 넘기기 ──────────────────────────────────────────────────────────────
 function doWait() {
-  if (state.turn !== 1 || state.isOver) return;
+  if (state.turn !== 1 || state.isOver || state.isProcessing) return;
+  state.isProcessing = true; // 대기 중 다른 입력 락
   const mpGain = 20;
   state.harryMP = Math.min(state.harryMaxMP, state.harryMP + mpGain);
   state.totalWaits++;
@@ -1396,6 +1409,9 @@ function executeSpell(spell, hitType, comboMult=1.0) {
     EL.harryPanel.classList.add('active-turn');
     EL.voldyPanel.classList.remove('active-turn');
     setButtonsEnabled(true);
+    
+    // 공격 애니메이션 등 겹침 방지를 위해 잠시 뒤에 lock 해제
+    setTimeout(() => { state.isProcessing = false; }, 800);
   }
 }
 
@@ -1455,9 +1471,7 @@ function showLevelup(desc) {
 
 // ── 볼드모트 AI ─────────────────────────────────────────────────────────────
 function voldemortTurn() {
-  // ✅ FIX: 해리 턴이면 절대 실행 안 함 (이중 호출 방어)
   if (state.isOver) return;
-  if (state.turn !== 2) return;
   EL.voldyThinking.classList.remove('visible');
 
   if (state.voldyStunned) {
@@ -1540,33 +1554,25 @@ function voldyImperio(rageMult=1.0) {
 function endVoldyTurn() {
   updateUI(); if(checkGameOver()) return;
   setTimeout(()=>{
+    state.turn=1;
     addLog('─────────────────────────────','#2a2a5a');
     if (state.harryStunned>0) {
-      // ✅ FIX: 행동불능 중엔 turn=2 유지 → voldemortTurn guard 통과
-      state.turn=2;
       addLog(`⚡ 해리가 Imperio에 걸려 행동 불능! (남은 턴: ${state.harryStunned})`, '#f1c40f');
       state.harryStunned--;
       state.turnCount++;
       state.harryMP=Math.min(state.harryMaxMP,state.harryMP+6);
-      if(state.avadaCooldown>0)    state.avadaCooldown--;
-      if(state.lumosCooldown>0)    state.lumosCooldown--;
+      if(state.avadaCooldown>0)   state.avadaCooldown--;
+      if(state.lumosCooldown>0)   state.lumosCooldown--;
       if(state.incendioCooldown>0) state.incendioCooldown--;
       if(state.stupefyCooldown>0)  state.stupefyCooldown--;
-      checkVoldyForm(); // ✅ FIX: 폼 체크 추가
       updateUI(); if(checkGameOver()) return;
-      setTimeout(()=>{
-        EL.voldyThinking.classList.add('visible');
-        EL.voldyPanel.classList.add('active-turn');
-        EL.harryPanel.classList.remove('active-turn');
-        setTimeout(voldemortTurn, 1800);
-      }, 1000);
+      setTimeout(()=>{ EL.voldyThinking.classList.add('visible'); EL.voldyPanel.classList.add('active-turn'); EL.harryPanel.classList.remove('active-turn'); setTimeout(voldemortTurn,1800); }, 1000);
     } else {
-      // 해리 턴으로 넘길 때만 turn=1
-      state.turn=1;
       addLog('👓 해리의 턴 — 주문을 선택하세요.','#4a9eff');
       EL.harryPanel.classList.add('active-turn');
       EL.voldyPanel.classList.remove('active-turn');
       setButtonsEnabled(true);
+      state.isProcessing = false; // 턴 시작시 해리 행동 락 해제
     }
   }, 1200);
 }
@@ -1610,7 +1616,7 @@ function updateUI() {
   if(state.voldyRage)    EL.voldyBadges.innerHTML+=`<span class="badge badge-rage">😡분노</span>`;
 
   function setCd(btn,cd,def){ if(!btn)return; if(cd>0){btn.disabled=true;btn.querySelector('.spell-desc').innerHTML=`쿨타임<br>⏳${cd}턴`;}else{if(!state.isOver)btn.disabled=false;btn.querySelector('.spell-desc').innerHTML=def;} }
-  setCd(EL.btnAvada,    state.avadaCooldown,    '피해 80<br>쿨타임 3턴');
+  setCd(EL.btnAvada,    state.avadaCooldown,    '피해 80<br>⚡극한 난이도');
   setCd(EL.btnLumos,    state.lumosCooldown,    'MP 전체 회복<br>쿨타임 4턴');
   setCd(EL.btnIncendio, state.incendioCooldown, '피해 28<br>화상 2턴');
   setCd(EL.btnStupefy,  state.stupefyCooldown,  '피해 10<br>크리시 턴 스킵');
